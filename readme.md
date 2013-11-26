@@ -1,1 +1,1 @@
-Могура (土竜)
+Yet Another Markdown Blog
