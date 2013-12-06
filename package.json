@@ -2,14 +2,18 @@
     "name": "yamb"
   , "version": "0.0.1"
   , "author": "Alexey Simonenko <alexey@simonenko.su>"
+  , "main": "./lib/index"
   , "engines": {
       "node": "0.11.x"
     }
   , "dependencies": {
         "co": "2.3.x"
+
+      , "marked": "0.2.x"
+      , "mdash": "0.0.x"
+      , "highlight.js": "7.5.x"
     }
   , "devDependencies": {
-        "coffee-script": "1.6.x"
-      , "jshint": "2.3.x"
+      "jshint": "2.3.x"
     }
 }
