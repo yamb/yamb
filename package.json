@@ -16,6 +16,7 @@
       , "marked": "0.2.x"
       , "mdash": "0.0.x"
       , "highlight.js": "7.5.x"
+      , "yandex-translate": "1.0.x"
     }
   , "devDependencies": {
         "mocha": "1.15.x"
