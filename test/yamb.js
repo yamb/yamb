@@ -1,3 +1,5 @@
+var should = require('should');
+
 var options = require('./_data/options');
 var schema = require('./_data/schema');
 var data = require('./_data/data');
@@ -8,9 +10,7 @@ describe('Yamb class', function() {
   it('should have default property', function() {
     var post = new Yamb();
 
-    for (var i=0, length = schema.keys.length; i<length; i++) {
-      post.should.have.property(schema.keys[i]);
-    }
+    post.should.have.properties(schema.keys);
 
     post.created.should.be.an.instanceOf(Date);
 
@@ -121,31 +121,43 @@ describe('Yamb class', function() {
     post.should.not.have.property('params');
   });
 
+  it('should have slug and it must be [a-z0-9] string', function() {
+    var post = new Yamb();
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
+
+    should(post.slug).equal(null);
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post.slug = poor[i];
+      should(post.slug).equal(null);
+    }
+
+    post.slug = 'Пульс твиттера о веб-разработке'
+    post.slug.should.equal('');
+
+    post.slug = 'Нужны ли классы в JavaScript?'
+    post.slug.should.equal('javascript');
+
+    post.slug = '  Use CSS3  box-sizing-'
+    post.slug.should.equal('use-css3-box-sizing');
+
+    post.slug = 'Use CSS3   box-sizing-'
+    post.slug.should.equal('use-css3-box-sizing');
+
+    post.slug = '_use_CSS3_box-sizing_   in   2014?'
+    post.slug.should.equal('use-css3-box-sizing-in-2014');
+  });
+
   it('should have title and it must be string', function() {
     var post = new Yamb();
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
 
     post.title.should.equal('');
 
-    post.title = undefined;
-    post.title.should.equal('');
-
-    post.title = NaN;
-    post.title.should.equal('');
-
-    post.title = null;
-    post.title.should.equal('');
-
-    post.title = false;
-    post.title.should.equal('');
-
-    post.title = [];
-    post.title.should.equal('');
-
-    post.title = ['1', '2', '3'];
-    post.title.should.equal('');
-
-    post.title = {};
-    post.title.should.equal('');
+    for (var i=0, length=poor.length; i<length; i++) {
+      post.title = poor[i];
+      post.title.should.equal('');
+    }
 
     post.title = 'title';
     post.title.should.equal('title');
