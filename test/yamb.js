@@ -80,6 +80,14 @@ describe('Yamb class', function() {
     post.should.have.property('id', 10);
   });
 
+  it('should have isolated property', function() {
+    var a = new Yamb({id: 10, title: 'title for a'});
+    var b = new Yamb({id: 20, title: 'title for b'});
+
+    a.title.should.not.equal(b.title);
+    a.id.should.not.equal(b.id);
+  });
+
   it('should update property from update method', function() {
     var post = new Yamb();
     post.update(data);
