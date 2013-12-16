@@ -12,8 +12,6 @@ describe('Yamb class', function() {
 
     post.should.have.properties(schema.keys);
 
-    post.created.should.be.an.instanceOf(Date);
-
     post.tags.should.be.an.instanceOf(Array);
     post.related.should.be.an.instanceOf(Array);
 
@@ -148,7 +146,7 @@ describe('Yamb class', function() {
     post.slug.should.equal('use-css3-box-sizing-in-2014');
   });
 
-  it('should have title and it must be string', function() {
+  it('should have title and it must be a string', function() {
     var post = new Yamb();
     var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
 
@@ -164,6 +162,48 @@ describe('Yamb class', function() {
 
     post.title = ' \n\n title   \n\n\n  \n \n  ';
     post.title.should.equal('title');
+  });
+
+  it('should have create time and it must be a date', function() {
+    var post, current;
+
+    var string = '2013-12-17 1:52';
+    var object = new Date(string);
+
+    post = new Yamb();
+    current = post.created;
+
+    post.created.should.be.an.instanceof(Date);
+    post.created.toISOString.should.be.type('function');
+
+    post.created = string;
+    post.created.toISOString().should.equal(current.toISOString());
+
+    (function() { post.update({created: string}); }).should.throw();
+
+    post = new Yamb({created: string});
+    post.created.toISOString().should.equal(object.toISOString());
+
+    post = new Yamb({created: object});
+    post.created.toISOString().should.equal(object.toISOString());
+  });
+
+  it('should have active property and it must be a boolean', function() {
+    var post = new Yamb();
+    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}];
+
+    post.active.should.equal(false);
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post.active = poor[i];
+      post.active.should.equal(false);
+    }
+
+    post.active = true;
+    post.active.should.be.true;
+
+    post.active = false;
+    post.active.should.be.false;
   });
 
   // Проверить типы данных в update
