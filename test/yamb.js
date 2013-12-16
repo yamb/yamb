@@ -3,7 +3,7 @@ var schema = require('./_data/schema');
 var data = require('./_data/data');
 
 describe('Yamb class', function() {
-  var Yamb = require('./../lib/post/index')(options);
+  var Yamb = require('./../lib/yamb/index')(options);
 
   it('should have default property', function() {
     var post = new Yamb();
@@ -145,4 +145,9 @@ describe('Yamb class', function() {
     post.title = ' \n\n title   \n\n\n  \n \n  ';
     post.title.should.equal('title');
   });
+
+  // Проверить типы данных в update
+  // Проверка всех геттеров/сеттеров по свойствам
+  // Проверить toJson метод
+  // Проверить save/delete
 });
