@@ -29,6 +29,6 @@
   , "scripts": {
         "lib-cov": "./node_modules/.bin/istanbul --harmony instrument --output lib-cov --no-compact --variable global.__coverage__ lib"
       , "cover": "npm run lib-cov && COVERAGE=1 ISTANBUL_REPORTERS=lcovonly ./node_modules/.bin/mocha --harmony --reporter mocha-istanbul && cat lcov.info | ./node_modules/.bin/coveralls && rm -rf lib-cov lcov.info"
-      , "test": "./node_modules/.bin/mocha --harmony test && npm run cover"
+      , "test": "./node_modules/.bin/mocha --harmony test"
     }
 }
