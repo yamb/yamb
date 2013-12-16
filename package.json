@@ -19,7 +19,9 @@
       , "yandex-translate": "1.0.x"
     }
   , "devDependencies": {
-        "mocha": "1.15.x"
+        "jshint": "2.3.x"
+
+      , "mocha": "1.15.x"
       , "should": "2.1.x"
 
       , "coveralls": "2.6.x"
@@ -29,6 +31,10 @@
   , "scripts": {
         "lib-cov": "./node_modules/.bin/istanbul --harmony instrument --output lib-cov --no-compact --variable global.__coverage__ lib"
       , "cover": "npm run lib-cov && COVERAGE=1 ISTANBUL_REPORTERS=lcovonly ./node_modules/.bin/mocha --harmony --reporter mocha-istanbul && cat lcov.info | ./node_modules/.bin/coveralls && rm -rf lib-cov lcov.info"
-      , "test": "./node_modules/.bin/mocha --harmony test"
+
+      , "jshint": "./node_modules/.bin/jshint lib"
+      , "mocha": "./node_modules/.bin/mocha --harmony test"
+
+      , "test": "npm run jshint && npm run mocha"
     }
 }
