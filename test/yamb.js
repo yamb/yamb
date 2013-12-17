@@ -50,15 +50,6 @@ describe('Yamb class', function() {
 
     post = new Yamb(['title', 'text']);
     post.should.have.property('title', '');
-
-    post = new Yamb({title: undefined});
-    post.should.have.property('title', '');
-
-    // post = new Yamb({title: null});
-    // post.should.have.property('title', '');
-
-    post = new Yamb({title: 'title'});
-    post.should.have.property('title', 'title');
   });
 
   it('should set id from constructor and mark it read-only', function() {
@@ -82,8 +73,8 @@ describe('Yamb class', function() {
     var a = new Yamb({id: 10, title: 'title for a'});
     var b = new Yamb({id: 20, title: 'title for b'});
 
-    a.title.should.not.equal(b.title);
-    a.id.should.not.equal(b.id);
+    a.title.should.not.eql(b.title);
+    a.id.should.not.eql(b.id);
   });
 
   it('should update property from update method', function() {
@@ -110,6 +101,11 @@ describe('Yamb class', function() {
     post.should.not.have.property('param2');
     post.should.not.have.property('param3');
 
+    var json = post.toJson();
+    json.should.not.have.property('param1');
+    json.should.not.have.property('param2');
+    json.should.not.have.property('param3');
+
     post = new Yamb();
     post.update(data);
 
@@ -120,9 +116,15 @@ describe('Yamb class', function() {
   });
 
   it('should have slug and it must be [a-z0-9] string', function() {
-    var post = new Yamb();
+    var post;
     var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
 
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({slug: poor[i]});
+      should(post.slug).equal(null);
+    }
+
+    post = new Yamb();
     should(post.slug).equal(null);
 
     for (var i=0, length=poor.length; i<length; i++) {
@@ -147,9 +149,15 @@ describe('Yamb class', function() {
   });
 
   it('should have title and it must be a string', function() {
-    var post = new Yamb();
+    var post;
     var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
 
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({title: poor[i]});
+      post.title.should.equal('');
+    }
+
+    post = new Yamb();
     post.title.should.equal('');
 
     for (var i=0, length=poor.length; i<length; i++) {
@@ -167,8 +175,15 @@ describe('Yamb class', function() {
   it('should have create time and it must be a date', function() {
     var post, current;
 
+    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}];
+
     var string = '2013-12-17 1:52';
     var object = new Date(string);
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({created: poor[i]});
+      post.created.should.be.an.instanceof(Date);
+    }
 
     post = new Yamb();
     current = post.created;
@@ -189,9 +204,15 @@ describe('Yamb class', function() {
   });
 
   it('should have active property and it must be a boolean', function() {
-    var post = new Yamb();
+    var post;
     var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}];
 
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({active: poor[i]});
+      post.active.should.equal(false);
+    }
+
+    post = new Yamb();
     post.active.should.equal(false);
 
     for (var i=0, length=poor.length; i<length; i++) {
