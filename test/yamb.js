@@ -171,6 +171,73 @@ describe('Yamb class', function() {
     post.title.should.equal('title');
   });
 
+  it('should have preview and it must be a string', function() {
+    var post;
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({preview: poor[i]});
+      post.preview.should.equal('');
+    }
+
+    post = new Yamb();
+    post.preview.should.equal('');
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post.preview = poor[i];
+      post.preview.should.equal('');
+    }
+
+    post.preview = 'text';
+    post.preview.should.equal('text');
+
+    post.preview = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+    post.preview.should.equal('text 1\n\ntext 2');
+  });
+
+  it('should have text and it must be a string', function() {
+    var post;
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({text: poor[i]});
+      post.text.should.equal('');
+    }
+
+    post = new Yamb();
+    post.text.should.equal('');
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post.text = poor[i];
+      post.text.should.equal('');
+    }
+
+    post = new Yamb();
+    post.text = 'text';
+    post.preview.should.equal('text');
+    post.text.should.equal('');
+
+    post = new Yamb();
+    post.text = 'text\n\n';
+    post.preview.should.equal('text');
+    post.text.should.equal('');
+
+    post = new Yamb();
+    post.text = 'text 1\n\n\n\n text 2';
+    post.preview.should.equal('text 1');
+    post.text.should.equal('text 2');
+
+    post = new Yamb();
+    post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+    post.preview.should.equal('text 1');
+    post.text.should.equal('text 2');
+
+    post = new Yamb();
+    post.preview = 'preview 1';
+    post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+    post.text.should.equal('text 1\n\ntext 2');
+  });
+
   it('should have tags list and it must be an array', function() {
     var post;
     var poor = [undefined, NaN, null, 0, 10, true, false, [], {}, {'param': 'value'}];
@@ -254,12 +321,6 @@ describe('Yamb class', function() {
     post.active.should.be.false;
   });
 
-  // preview: ''
-  // text: ''
-  // tags: []
-
-  // Проверить типы данных в update
-  // Проверка всех геттеров/сеттеров по свойствам
-  // Проверить toJson метод
+  // uri: ''
   // Проверить save/delete
 });
