@@ -12,7 +12,6 @@ describe('Yamb class', function() {
 
     post.should.have.properties(schema.keys);
 
-    post.tags.should.be.an.instanceOf(Array);
     post.related.should.be.an.instanceOf(Array);
 
     post.snippets.should.be.an.instanceOf(Object);
@@ -172,6 +171,34 @@ describe('Yamb class', function() {
     post.title.should.equal('title');
   });
 
+  it('should have tags list and it must be an array', function() {
+    var post;
+    var poor = [undefined, NaN, null, 0, 10, true, false, [], {}, {'param': 'value'}];
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({tags: poor[i]});
+      post.tags.should.eql([]);
+    }
+
+    post = new Yamb();
+    post.tags.should.eql([]);
+    post.tags.should.be.an.instanceOf(Array);
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post.tags = poor[i];
+      post.tags.should.eql([]);
+    }
+
+    post.tags = ['tag 1', 'tag 2'];
+    post.tags.should.eql(['tag 1', 'tag 2']);
+
+    post.tags = 'tag 1'
+    post.tags.should.eql(['tag 1']);
+
+    post.tags.push('tag 2');
+    post.tags.should.eql(['tag 1', 'tag 2']);
+  });
+
   it('should have create time and it must be a date', function() {
     var post, current;
 
@@ -226,6 +253,10 @@ describe('Yamb class', function() {
     post.active = false;
     post.active.should.be.false;
   });
+
+  // preview: ''
+  // text: ''
+  // tags: []
 
   // Проверить типы данных в update
   // Проверка всех геттеров/сеттеров по свойствам
