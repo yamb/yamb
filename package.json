@@ -29,11 +29,11 @@
       , "mocha-istanbul": "0.2.x"
     }
   , "scripts": {
-        "lib-cov": "./node_modules/.bin/istanbul --harmony instrument --output lib-cov --no-compact --variable global.__coverage__ lib"
+        "lib-cov": "./node_modules/.bin/istanbul instrument --output lib-cov --no-compact --variable global.__coverage__ lib"
       , "cover": "npm run lib-cov && COVERAGE=1 ISTANBUL_REPORTERS=lcovonly ./node_modules/.bin/mocha --harmony --reporter mocha-istanbul && cat lcov.info | ./node_modules/.bin/coveralls && rm -rf lib-cov lcov.info"
 
       , "jshint": "./node_modules/.bin/jshint lib"
-      , "mocha": "./node_modules/.bin/mocha --harmony --reporter dot test"
+      , "mocha": "./node_modules/.bin/mocha --harmony --reporter dot"
 
       , "test": "npm run jshint && npm run mocha"
     }
