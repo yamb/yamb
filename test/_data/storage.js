@@ -12,7 +12,7 @@ function removeById(table, id, fn) {
 
 function save(table, params, fn) {
   setImmediate(function() {
-    if (!params._id) {
+    if (!params._id && !params.id) {
       params._id = 10;
     }
 

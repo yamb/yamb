@@ -12,7 +12,7 @@
     }
   , "dependencies": {
         "co": "2.3.x"
-
+      , "clone": "0.1.x"
       , "marked": "0.2.x"
       , "mdash": "0.0.x"
       , "highlight.js": "7.5.x"

@@ -59,7 +59,7 @@ describe('Yamb save method', function() {
     });
   });
 
-  it('should work', function(done) {
+  it('should work for new data', function(done) {
     var post = new Yamb();
     post.update(data);
 
@@ -67,6 +67,24 @@ describe('Yamb save method', function() {
       should(error).equal(null);
 
       result.id.should.equal(10);
+      result.slug.should.equal('a-panhandlers-guide-to-business-life-love');
+      result.title.should.equal('Pay People What They\'re Worth');
+
+      done();
+    });
+  });
+
+  it('should work for updated data', function(done) {
+    var post = new Yamb();
+    var json = post.update(data).toJson();
+
+    json.id = 100;
+    var post = new Yamb(json);
+
+    post.save(function(error, result) {
+      should(error).equal(null);
+
+      result.id.should.equal(100);
       result.slug.should.equal('a-panhandlers-guide-to-business-life-love');
       result.title.should.equal('Pay People What They\'re Worth');
 

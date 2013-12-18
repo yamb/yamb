@@ -4,6 +4,8 @@ var options = require('./_data/options');
 var schema = require('./_data/schema');
 var data = require('./_data/data');
 
+var dummy = function() {};
+
 describe('Yamb class', function() {
   var Yamb = require('./../lib/yamb/index')(options);
 
@@ -116,7 +118,7 @@ describe('Yamb class', function() {
 
   it('should have slug and it must be [a-z0-9] string', function() {
     var post;
-    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({slug: poor[i]});
@@ -149,7 +151,7 @@ describe('Yamb class', function() {
 
   it('should have title and it must be a string', function() {
     var post;
-    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({title: poor[i]});
@@ -173,7 +175,7 @@ describe('Yamb class', function() {
 
   it('should have preview and it must be a string', function() {
     var post;
-    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({preview: poor[i]});
@@ -197,7 +199,7 @@ describe('Yamb class', function() {
 
   it('should have text and it must be a string', function() {
     var post;
-    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}];
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({text: poor[i]});
@@ -240,7 +242,7 @@ describe('Yamb class', function() {
 
   it('should have tags list and it must be an array', function() {
     var post;
-    var poor = [undefined, NaN, null, 0, 10, true, false, [], {}, {'param': 'value'}];
+    var poor = [undefined, NaN, null, 0, 10, true, false, [], {}, {'param': 'value'}, dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({tags: poor[i]});
@@ -269,7 +271,7 @@ describe('Yamb class', function() {
   it('should have create time and it must be a date', function() {
     var post, current;
 
-    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}];
+    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
 
     var string = '2013-12-17 1:52';
     var object = new Date(string);
@@ -299,7 +301,7 @@ describe('Yamb class', function() {
 
   it('should have active property and it must be a boolean', function() {
     var post;
-    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}];
+    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({active: poor[i]});
@@ -328,6 +330,8 @@ describe('Yamb class', function() {
     json.title = 'Title';
     json.should.not.equal(post.toJson());
     json.title.should.not.equal(post.title);
+    json.created.should.be.an.instanceof(Date);
+    json.created.toISOString.should.be.type('function');
   });
 
   // uri: ''
