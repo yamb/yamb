@@ -1,4 +1,4 @@
 module.exports = {
-  dbname: 'yamb',
+  dbname: 'yamb-test',
   storage: require('./storage')
 };

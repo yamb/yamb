@@ -1,3 +1,5 @@
 --reporter spec
 --require should
-test/yamb.js
+--timeout 5000
+--bail
+test/*.js

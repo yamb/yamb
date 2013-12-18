@@ -331,5 +331,4 @@ describe('Yamb class', function() {
   });
 
   // uri: ''
-  // Проверить save/delete
 });

@@ -33,7 +33,7 @@
       , "cover": "npm run lib-cov && COVERAGE=1 ISTANBUL_REPORTERS=lcovonly ./node_modules/.bin/mocha --harmony --reporter mocha-istanbul && cat lcov.info | ./node_modules/.bin/coveralls && rm -rf lib-cov lcov.info"
 
       , "jshint": "./node_modules/.bin/jshint lib"
-      , "mocha": "./node_modules/.bin/mocha --harmony test"
+      , "mocha": "./node_modules/.bin/mocha --harmony --reporter dot test"
 
       , "test": "npm run jshint && npm run mocha"
     }
