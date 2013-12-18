@@ -37,4 +37,5 @@
 
       , "test": "npm run jshint && npm run mocha"
     }
+  , "license": "MIT"
 }
