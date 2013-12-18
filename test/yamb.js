@@ -321,6 +321,15 @@ describe('Yamb class', function() {
     post.active.should.be.false;
   });
 
+  it('should export data to json', function() {
+    var post = new Yamb(data);
+    var json = post.toJson();
+
+    json.title = 'Title';
+    json.should.not.equal(post.toJson());
+    json.title.should.not.equal(post.title);
+  });
+
   // uri: ''
   // Проверить save/delete
 });
