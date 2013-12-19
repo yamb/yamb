@@ -41,4 +41,21 @@ describe('Yamb delete()', function() {
       done();
     });
   });
+
+  it('should remove newly created object', function(done) {
+    var post = new Yamb();
+    post.update(data);
+
+    post.save(function(error, result) {
+      should(error).equal(null);
+      should(result).be.ok;
+
+      result.remove(function(error, result) {
+        should(error).equal(null);
+        result.should.be.true;
+
+        done();
+      });
+    });
+  });
 });
