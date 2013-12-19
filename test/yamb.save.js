@@ -52,6 +52,7 @@ describe('Yamb save method', function() {
 
     post.save(function(error, result) {
       should(error).equal(null);
+      should(result).be.ok;
 
       result.id.should.equal(10);
       result.slug.should.equal('title-2014');
@@ -68,6 +69,7 @@ describe('Yamb save method', function() {
 
     post.save(function(error, result) {
       should(error).equal(null);
+      should(result).be.ok;
 
       result.id.should.equal(10);
       result.slug.should.equal('a-panhandlers-guide-to-business-life-love');
@@ -86,6 +88,7 @@ describe('Yamb save method', function() {
 
     post.save(function(error, result) {
       should(error).equal(null);
+      should(result).be.ok;
 
       result.id.should.equal(100);
       result.slug.should.equal('a-panhandlers-guide-to-business-life-love');
