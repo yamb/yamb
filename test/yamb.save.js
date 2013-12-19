@@ -32,10 +32,9 @@ describe('Yamb save method', function() {
     });
   });
 
-  it('should throw error if slug not exists', function(done) {
+  it('should throw error if only slug exists', function(done) {
     var post = new Yamb();
-    post.title = 'title';
-    post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+    post.slug = 'what\'s new in 2014 year';
 
     post.save(function(error, result) {
       should(error).not.equal(null);
@@ -46,14 +45,18 @@ describe('Yamb save method', function() {
     });
   });
 
-  it('should throw error if only slug exists', function(done) {
+  it('should get slug from yandex translate', function(done) {
     var post = new Yamb();
-    post.slug = 'what\'s new in 2014 year';
+    post.title = 'Заголовок 2014';
+    post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
 
     post.save(function(error, result) {
-      should(error).not.equal(null);
-      should(error).be.an.instanceOf(Error);
-      should(result).not.be.ok;
+      should(error).equal(null);
+
+      result.id.should.equal(10);
+      result.slug.should.equal('title-2014');
+      // result.preview.should.equal('text 1');
+      // result.text.should.equal('text 2');
 
       done();
     });
