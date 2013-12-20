@@ -335,4 +335,8 @@ describe('Yamb class', function() {
   });
 
   // uri: ''
+  // author: ''
+  // related: []
+  // snippets: {}
+  // stats: {}
 });

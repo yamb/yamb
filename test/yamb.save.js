@@ -3,7 +3,7 @@ var should = require('should');
 var options = require('./_data/options');
 var data = require('./_data/data');
 
-describe('Yamb save method', function() {
+describe('Yamb save()', function() {
   var Yamb = require('./../lib/yamb/index')(options);
 
   it('should throw error if only title exists', function(done) {
@@ -56,8 +56,8 @@ describe('Yamb save method', function() {
 
       result.id.should.equal(10);
       result.slug.should.equal('title-2014');
-      // result.preview.should.equal('text 1');
-      // result.text.should.equal('text 2');
+      result.preview.should.equal('text 1');
+      result.text.should.equal('text 2');
 
       done();
     });
@@ -73,7 +73,7 @@ describe('Yamb save method', function() {
 
       result.id.should.equal(10);
       result.slug.should.equal('a-panhandlers-guide-to-business-life-love');
-      result.title.should.equal('Pay People What They\'re Worth');
+      result.title.should.equal('Pay People What They’re Worth');
 
       done();
     });
