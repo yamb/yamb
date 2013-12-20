@@ -1,6 +1,6 @@
 {
     "name": "yamb"
-  , "version": "0.0.2"
+  , "version": "0.0.3"
   , "author": "Alexey Simonenko <alexey@simonenko.su>"
   , "main": "./lib/index"
   , "repository": {
@@ -11,10 +11,10 @@
       "node": "0.11.x"
     }
   , "dependencies": {
-        "co": "2.3.x"
+        "co": "3.0.x"
       , "clone": "0.1.x"
       , "marked": "0.2.x"
-      , "mdash": "0.0.x"
+      , "mdash": "0.1.x"
       , "highlight.js": "7.5.x"
       , "yandex-translate": "1.0.x"
     }
