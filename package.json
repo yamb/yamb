@@ -21,7 +21,7 @@
   , "devDependencies": {
         "jshint": "2.3.x"
 
-      , "mocha": "1.15.x"
+      , "mocha": "1.16.x"
       , "should": "2.1.x"
 
       , "coveralls": "2.6.x"
