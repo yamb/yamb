@@ -22,7 +22,6 @@ describe('Yamb class', function() {
 
   it('should not give to overload methods', function() {
     var post = new Yamb();
-    var dummy = function() {};
 
     post.update = dummy;
     post.update.should.not.equal(dummy);
@@ -38,19 +37,17 @@ describe('Yamb class', function() {
   });
 
   it('should update property from constructor', function() {
-    var post;
+    var a = new Yamb();
+    a.should.have.property('title', '');
 
-    post = new Yamb();
-    post.should.have.property('title', '');
+    var b = new Yamb(null);
+    b.should.have.property('title', '');
 
-    post = new Yamb(null);
-    post.should.have.property('title', '');
+    var c = new Yamb('title');
+    c.should.have.property('title', '');
 
-    post = new Yamb('title');
-    post.should.have.property('title', '');
-
-    post = new Yamb(['title', 'text']);
-    post.should.have.property('title', '');
+    var d = new Yamb(['title', 'text']);
+    d.should.have.property('title', '');
   });
 
   it('should set id from constructor and mark it read-only', function() {
