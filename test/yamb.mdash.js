@@ -8,7 +8,7 @@ describe('Yamb EMT typographer', function() {
 
   it('should update title', function(done) {
     var post = new Yamb();
-    post.update(data);
+    post.update(data.create);
 
     post.title = '"May the force be with you."';
 
@@ -24,7 +24,7 @@ describe('Yamb EMT typographer', function() {
 
   it('should update text with preview', function(done) {
     var post = new Yamb();
-    post.update(data);
+    post.update(data.create);
 
     post.preview = '"The force" - is a magical power that gives people strength.';
     post.text = '"The force" - is a magical power that gives people strength.';

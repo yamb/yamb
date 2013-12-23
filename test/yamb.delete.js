@@ -20,7 +20,7 @@ describe('Yamb delete()', function() {
 
   it('should return error if object not saved yet', function(done) {
     var post = new Yamb();
-    post.update(data);
+    post.update(data.create);
 
     post.remove(function(error, result) {
       should(error).not.equal(null);
@@ -32,7 +32,7 @@ describe('Yamb delete()', function() {
   });
 
   it('should remove object', function(done) {
-    var post = new Yamb(data);
+    var post = new Yamb(data.create);
 
     post.remove(function(error, result) {
       should(error).equal(null);
@@ -44,7 +44,7 @@ describe('Yamb delete()', function() {
 
   it('should remove newly created object', function(done) {
     var post = new Yamb();
-    post.update(data);
+    post.update(data.create);
 
     post.save(function(error, result) {
       should(error).equal(null);

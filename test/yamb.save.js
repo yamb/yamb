@@ -65,7 +65,7 @@ describe('Yamb save()', function() {
 
   it('should work for new data', function(done) {
     var post = new Yamb();
-    post.update(data);
+    post.update(data.create);
 
     post.save(function(error, result) {
       should(error).equal(null);
@@ -81,7 +81,7 @@ describe('Yamb save()', function() {
 
   it('should work for updated data', function(done) {
     var post = new Yamb();
-    var json = post.update(data).toJson();
+    var json = post.update(data.create).toJson();
 
     json.id = 100;
     var post = new Yamb(json);

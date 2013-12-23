@@ -80,7 +80,7 @@ describe('Yamb class', function() {
 
   it('should update property from update method', function() {
     var post = new Yamb();
-    post.update(data);
+    post.update(data.create);
 
     post.should.have.property('slug', 'a-panhandlers-guide-to-business-life-love');
     post.should.have.property('title', "Pay People What They're Worth");
@@ -108,7 +108,7 @@ describe('Yamb class', function() {
     json.should.not.have.property('param3');
 
     post = new Yamb();
-    post.update(data);
+    post.update(data.create);
 
     (function() { post.id; }).should.throw();
 
@@ -324,7 +324,7 @@ describe('Yamb class', function() {
   });
 
   it('should export data to json', function() {
-    var post = new Yamb(data);
+    var post = new Yamb(data.create);
     var json = post.toJson();
 
     json.title = 'Title';
