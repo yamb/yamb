@@ -80,19 +80,30 @@ describe('Yamb save()', function() {
   });
 
   it('should work for updated data', function(done) {
-    var post = new Yamb();
-    var json = post.update(data.create).toJson();
+    var post = new Yamb(data.update);
 
-    json.id = 100;
-    var post = new Yamb(json);
+    post.created.should.be.an.instanceof(Date);
+    post.created.toISOString.should.be.type('function');
+
+    post.tags.push('marketing');
+    post.active = false;
 
     post.save(function(error, result) {
       should(error).equal(null);
       should(result).be.ok;
 
-      result.id.should.equal(100);
-      result.slug.should.equal('a-panhandlers-guide-to-business-life-love');
-      result.title.should.equal('Pay People What They\'re Worth');
+      result.id.should.equal(data.update._id);
+
+      result.slug.should.equal(data.update.slug);
+      result.title.should.equal(data.update.title);
+
+      result.preview.should.equal(data.update.preview);
+      result.text.should.equal(data.update.text);
+
+      result.tags.should.contain('business');
+      result.tags.should.contain('marketing');
+
+      result.active.should.equal(false);
 
       done();
     });
