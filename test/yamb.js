@@ -119,15 +119,15 @@ describe('Yamb class', function() {
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({slug: poor[i]});
-      should(post.slug).equal(null);
+      should(post.slug).equal(schema.data.slug);
     }
 
     post = new Yamb();
-    should(post.slug).equal(null);
+    should(post.slug).equal(schema.data.slug);
 
     for (var i=0, length=poor.length; i<length; i++) {
       post.slug = poor[i];
-      should(post.slug).equal(null);
+      should(post.slug).equal(schema.data.slug);
     }
 
     post.slug = 'Пульс твиттера о веб-разработке'
@@ -152,15 +152,15 @@ describe('Yamb class', function() {
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({title: poor[i]});
-      post.title.should.equal('');
+      post.title.should.equal(schema.data.title);
     }
 
     post = new Yamb();
-    post.title.should.equal('');
+    post.title.should.equal(schema.data.title);
 
     for (var i=0, length=poor.length; i<length; i++) {
       post.title = poor[i];
-      post.title.should.equal('');
+      post.title.should.equal(schema.data.title);
     }
 
     post.title = 'title';
@@ -176,15 +176,15 @@ describe('Yamb class', function() {
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({preview: poor[i]});
-      post.preview.should.equal('');
+      post.preview.should.equal(schema.data.preview);
     }
 
     post = new Yamb();
-    post.preview.should.equal('');
+    post.preview.should.equal(schema.data.preview);
 
     for (var i=0, length=poor.length; i<length; i++) {
       post.preview = poor[i];
-      post.preview.should.equal('');
+      post.preview.should.equal(schema.data.preview);
     }
 
     post.preview = 'text';
@@ -200,15 +200,15 @@ describe('Yamb class', function() {
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({text: poor[i]});
-      post.text.should.equal('');
+      post.text.should.equal(schema.data.text);
     }
 
     post = new Yamb();
-    post.text.should.equal('');
+    post.text.should.equal(schema.data.text);
 
     for (var i=0, length=poor.length; i<length; i++) {
       post.text = poor[i];
-      post.text.should.equal('');
+      post.text.should.equal(schema.data.text);
     }
 
     post = new Yamb();
@@ -235,6 +235,44 @@ describe('Yamb class', function() {
     post.preview = 'preview 1';
     post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
     post.text.should.equal('text 1\n\ntext 2');
+  });
+
+  it('should have author and it must be an specific object', function() {
+    var post;
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+
+    function shouldAuthor(author, name, email) {
+      author.should.be.an.instanceof(Object);
+      author.should.have.property('name', name);
+      author.should.have.property('email', email);
+    }
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({author: poor[i]});
+      shouldAuthor(post.author, '', '');
+    }
+
+    post = new Yamb();
+    shouldAuthor(post.author, '', '');
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post.author = poor[i];
+      shouldAuthor(post.author, '', '');
+    }
+
+    post = new Yamb();
+    post.author = 'Alexey Simonenko';
+    shouldAuthor(post.author, 'Alexey Simonenko', '');
+
+    post.author = {email: 'alexey@simonenko.su'};
+    shouldAuthor(post.author, 'Alexey Simonenko', 'alexey@simonenko.su');
+
+    post.author = {name: 'Alexey', email: 'dwarfman@gmail.com'};
+    shouldAuthor(post.author, 'Alexey', 'dwarfman@gmail.com');
+
+    var author = post.author;
+    author.name = 'Alexey Simonenko';
+    post.author.name.should.equal('Alexey');
   });
 
   it('should have tags list and it must be an array', function() {
@@ -302,15 +340,15 @@ describe('Yamb class', function() {
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({active: poor[i]});
-      post.active.should.equal(false);
+      post.active.should.equal(schema.data.active);
     }
 
     post = new Yamb();
-    post.active.should.equal(false);
+    post.active.should.equal(schema.data.active);
 
     for (var i=0, length=poor.length; i<length; i++) {
       post.active = poor[i];
-      post.active.should.equal(false);
+      post.active.should.equal(schema.data.active);
     }
 
     post.active = true;
@@ -332,7 +370,6 @@ describe('Yamb class', function() {
   });
 
   // uri: ''
-  // author: ''
   // related: []
   // snippets: {}
   // stats: {}
