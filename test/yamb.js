@@ -273,6 +273,10 @@ describe('Yamb class', function() {
     var author = post.author;
     author.name = 'Alexey Simonenko';
     post.author.name.should.equal('Alexey');
+
+    post = new Yamb();
+    post.author.name = 'Alexey Simonenko';
+    post.author.name.should.equal('');
   });
 
   it('should have tags list and it must be an array', function() {
