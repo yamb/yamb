@@ -32,8 +32,8 @@ describe('Yamb class', function() {
     post.remove = dummy;
     post.remove.should.not.equal(dummy);
 
-    post.toJson = dummy;
-    post.toJson.should.not.equal(dummy);
+    post.json = dummy;
+    post.json.should.not.equal(dummy);
   });
 
   it('should update property from constructor', function() {
@@ -99,7 +99,7 @@ describe('Yamb class', function() {
     post.should.not.have.property('param2');
     post.should.not.have.property('param3');
 
-    var json = post.toJson();
+    var json = post.json();
     json.should.not.have.property('param1');
     json.should.not.have.property('param2');
     json.should.not.have.property('param3');
@@ -364,10 +364,10 @@ describe('Yamb class', function() {
 
   it('should export data to json', function() {
     var post = new Yamb(data.create);
-    var json = post.toJson();
+    var json = post.json();
 
     json.title = 'Title';
-    json.should.not.equal(post.toJson());
+    json.should.not.equal(post.json());
     json.title.should.not.equal(post.title);
     json.created.should.be.an.instanceof(Date);
     json.created.toISOString.should.be.type('function');
