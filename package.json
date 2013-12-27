@@ -13,7 +13,7 @@
   , "dependencies": {
         "co": "3.0.x"
       , "clone": "0.1.x"
-      , "marked": "0.2.x"
+      , "marked": "0.3.x"
       , "mdash": "0.1.x"
       , "highlight.js": "7.5.x"
       , "yandex-translate": "1.0.x"
