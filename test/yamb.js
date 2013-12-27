@@ -14,8 +14,6 @@ describe('Yamb class', function() {
 
     post.should.have.properties(schema.keys);
 
-    post.related.should.be.an.instanceOf(Array);
-
     post.snippets.should.be.an.instanceOf(Object);
     post.stats.should.be.an.instanceOf(Object);
   });
@@ -279,6 +277,39 @@ describe('Yamb class', function() {
     post.author.name.should.equal('');
   });
 
+  it('should have related list and it must be an array', function() {
+    var post;
+    var poor = [undefined, NaN, null, true, false, {}, {'param': 'value'}, dummy];
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({related: poor[i]});
+      post.related.should.eql([]);
+    }
+
+    post = new Yamb();
+    post.related.should.eql([]);
+    post.related.should.be.an.instanceOf(Array);
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post.related = poor[i];
+      post.related.should.eql([]);
+    }
+
+    post.related = 10;
+    post.related.should.eql([10]);
+
+    post.related = '10';
+    post.related.should.eql(['10']);
+
+    a = new Yamb();
+
+    post.related = a;
+    post.related.should.eql([a]);
+
+    post.related = [10, null, '10', a, {}, dummy];
+    post.related.should.eql([10, '10', a]);
+  });
+
   it('should have tags list and it must be an array', function() {
     var post;
     var poor = [undefined, NaN, null, 0, 10, true, false, [], {}, {'param': 'value'}, dummy];
@@ -374,7 +405,6 @@ describe('Yamb class', function() {
   });
 
   // uri: ''
-  // related: []
   // snippets: {}
   // stats: {}
 });
