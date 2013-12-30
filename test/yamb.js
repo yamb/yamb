@@ -14,8 +14,7 @@ describe('Yamb class', function() {
 
     post.should.have.properties(schema.keys);
 
-    post.snippets.should.be.an.instanceOf(Object);
-    post.stats.should.be.an.instanceOf(Object);
+    post.snippets.should.be.an.instanceof(Object);
   });
 
   it('should not give to overload methods', function() {
@@ -80,7 +79,7 @@ describe('Yamb class', function() {
     post.should.have.property('slug', 'a-panhandlers-guide-to-business-life-love');
     post.should.have.property('title', "Pay People What They're Worth");
 
-    post.tags.should.be.an.instanceOf(Array).and.have.length(1);
+    post.tags.should.be.an.instanceof(Array).and.have.length(1);
     post.tags.should.include('business');
   });
 
@@ -288,7 +287,7 @@ describe('Yamb class', function() {
 
     post = new Yamb();
     post.related.should.eql([]);
-    post.related.should.be.an.instanceOf(Array);
+    post.related.should.be.an.instanceof(Array);
 
     for (var i=0, length=poor.length; i<length; i++) {
       post.related = poor[i];
@@ -321,7 +320,7 @@ describe('Yamb class', function() {
 
     post = new Yamb();
     post.tags.should.eql([]);
-    post.tags.should.be.an.instanceOf(Array);
+    post.tags.should.be.an.instanceof(Array);
 
     for (var i=0, length=poor.length; i<length; i++) {
       post.tags = poor[i];
@@ -336,6 +335,44 @@ describe('Yamb class', function() {
 
     post.tags.push('tag 2');
     post.tags.should.eql(['tag 1', 'tag 2']);
+  });
+
+  it('should have statistics params', function() {
+    var post;
+    var poor = [undefined, NaN, null, true, false, [], [10, 20], {}, {'param': 'value'}, dummy];
+
+    function shouldStatistics(stats, views, likes, comments) {
+      stats.should.be.an.instanceof(Object);
+      stats.should.have.properties(['views', 'likes', 'comments']);
+
+      stats.views.should.eql(views);
+      stats.likes.should.eql(likes);
+      stats.comments.should.eql(comments);
+    }
+
+    a = new Yamb();
+    shouldStatistics(a.stats, 0, 0, 0);
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      a.stats.views = poor[i];
+      a.stats.views.should.eql(0);
+
+      a.stats = {views: poor[i]};
+      a.stats.views.should.eql(0);
+    }
+
+    a.stats = {views: 10, comments: '5', likes: 'test-20', unique: 30};
+    shouldStatistics(a.stats, 10, 0, 5);
+
+    a.stats.views++;
+    a.stats.views++;
+    a.stats.views.should.eql(12);
+
+    b = new Yamb();
+    shouldStatistics(b.stats, 0, 0, 0);
+
+    b.update({stats: {views: 10, likes: 5, comments: 'test'}});
+    shouldStatistics(b.stats, 10, 5, 0);
   });
 
   it('should have create time and it must be a date', function() {
