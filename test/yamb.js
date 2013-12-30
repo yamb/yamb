@@ -350,7 +350,21 @@ describe('Yamb class', function() {
       stats.comments.should.eql(comments);
     }
 
-    a = new Yamb();
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb({stats: poor[i]});
+      shouldStatistics(post.stats, 0, 0, 0);
+    }
+
+    post = new Yamb({stats: {unqiue: 10, facebook: 5, twitter: 20}});
+    shouldStatistics(post.stats, 0, 0, 0);
+
+    post = new Yamb({stats: {views: '10', comments: '5', likes: '20'}});
+    shouldStatistics(post.stats, 0, 0, 0);
+
+    post = new Yamb({stats: {views: 10, comments: 5, likes: 20}});
+    shouldStatistics(post.stats, 10, 20, 5);
+
+    var a = new Yamb();
     shouldStatistics(a.stats, 0, 0, 0);
 
     for (var i=0, length=poor.length; i<length; i++) {
@@ -368,10 +382,13 @@ describe('Yamb class', function() {
     a.stats.views++;
     a.stats.views.should.eql(12);
 
-    b = new Yamb();
+    var b = new Yamb();
     shouldStatistics(b.stats, 0, 0, 0);
 
     b.update({stats: {views: 10, likes: 5, comments: 'test'}});
+    shouldStatistics(b.stats, 10, 5, 0);
+
+    b.stats = {unqiue: 10, facebook: 5, twitter: 20};
     shouldStatistics(b.stats, 10, 5, 0);
   });
 
@@ -443,5 +460,4 @@ describe('Yamb class', function() {
 
   // uri: ''
   // snippets: {}
-  // stats: {}
 });
