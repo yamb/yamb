@@ -8,7 +8,7 @@
       , "url": "https://github.com/yamb/yamb.git"
     }
   , "engines": {
-      "node": "0.11.x"
+      "node": "~0.11"
     }
   , "dependencies": {
         "co": "3.0.x"
