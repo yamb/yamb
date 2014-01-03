@@ -2,6 +2,7 @@
 --require should
 --timeout 5000
 --bail
+--check-leaks
 
 test/yamb.js
 test/yamb.save.js

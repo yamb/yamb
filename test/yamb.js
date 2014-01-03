@@ -300,7 +300,7 @@ describe('Yamb class', function() {
     post.related = '10';
     post.related.should.eql(['10']);
 
-    a = new Yamb();
+    var a = new Yamb();
 
     post.related = a;
     post.related.should.eql([a]);
