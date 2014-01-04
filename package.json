@@ -19,22 +19,16 @@
       , "yandex-translate": "1.0.x"
     }
   , "devDependencies": {
-        "jshint": "2.4.x"
-
-      , "mocha": "1.16.x"
-      , "should": "2.1.x"
-
-      , "coveralls": "2.6.x"
-      , "istanbul": "0.2.x"
-      , "mocha-istanbul": "0.2.x"
+        "jshint": "~2.4"
+      , "mocha": "~1.16"
+      , "should": "~2.1"
+      , "coveralls": "~2.6"
+      , "istanbul": "gotwarlost/istanbul#harmony"
     }
   , "scripts": {
-        "lib-cov": "./node_modules/.bin/istanbul instrument --output lib-cov --no-compact --variable global.__coverage__ lib"
-      , "cover": "npm run lib-cov && COVERAGE=1 ISTANBUL_REPORTERS=lcovonly ./node_modules/.bin/mocha --harmony --reporter mocha-istanbul && cat lcov.info | ./node_modules/.bin/coveralls && rm -rf lib-cov lcov.info"
-
+        "coveralls": "node --harmony ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R dot && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
       , "jshint": "./node_modules/.bin/jshint lib"
       , "mocha": "./node_modules/.bin/mocha --harmony --reporter dot"
-
       , "test": "npm run jshint && npm run mocha"
     }
   , "license": "MIT"

@@ -1,6 +1,4 @@
 .DS_Store
+coverage
 node_modules
-lib-cov
-html-report
-lcov.info
 todo.md
