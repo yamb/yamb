@@ -1,3 +1,4 @@
+var co = require('co');
 var should = require('should');
 
 var options = require('./_data/options');
@@ -7,105 +8,132 @@ describe('Yamb save()', function() {
   var Yamb = require('./../lib/yamb/index')(options);
 
   it('should throw error if only title exists', function(done) {
-    var post = new Yamb();
-    post.title = 'title';
+    co(function *() {
+      var post = new Yamb();
+      var error = null;
 
-    post.save(function(error, result) {
+      post.title = 'title';
+
+      try {
+        post = yield post.save();
+      } catch (err) {
+        post = false;
+        error = err;
+      }
+
       should(error).not.equal(null);
       should(error).be.an.instanceOf(Error);
-      should(result).not.be.ok;
+      should(post).not.be.ok;
 
       done();
-    });
+    })();
   });
 
   it('should throw error if only preview/text exists', function(done) {
-    var post = new Yamb();
-    post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+    co(function *() {
+      var post = new Yamb();
+      var error = null;
 
-    post.save(function(error, result) {
+      post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+
+      try {
+        post = yield post.save();
+      } catch (err) {
+        post = false;
+        error = err;
+      }
+
       should(error).not.equal(null);
       should(error).be.an.instanceOf(Error);
-      should(result).not.be.ok;
+      should(post).not.be.ok;
 
       done();
-    });
+    })();
   });
 
   it('should throw error if only slug exists', function(done) {
-    var post = new Yamb();
-    post.slug = 'what\'s new in 2014 year';
+    co(function *() {
+      var post = new Yamb();
+      var error = null;
 
-    post.save(function(error, result) {
+      post.slug = 'what\'s new in 2014 year';
+
+      try {
+        post = yield post.save();
+      } catch (err) {
+        post = false;
+        error = err;
+      }
+
       should(error).not.equal(null);
       should(error).be.an.instanceOf(Error);
-      should(result).not.be.ok;
+      should(post).not.be.ok;
 
       done();
-    });
+    })();
   });
 
   it('should get slug from yandex translate', function(done) {
-    var post = new Yamb();
-    post.title = 'Заголовок 2014';
-    post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+    co(function *() {
+      var post = new Yamb();
 
-    post.save(function(error, result) {
-      should(error).equal(null);
-      should(result).be.ok;
+      post.title = 'Заголовок 2014';
+      post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
 
-      result.id.should.equal(10);
-      result.slug.should.equal('title-2014');
-      result.preview.should.equal('text 1');
-      result.text.should.equal('text 2');
+      post = yield post.save();
+
+      should(post).be.ok;
+
+      post.id.should.equal(10);
+      post.slug.should.equal('title-2014');
+      post.preview.should.equal('text 1');
+      post.text.should.equal('text 2');
 
       done();
-    });
+    })();
   });
 
   it('should work for new data', function(done) {
-    var post = new Yamb();
-    post.update(data.create);
+    co(function *() {
+      var post = new Yamb();
+      post.update(data.create);
 
-    post.save(function(error, result) {
-      should(error).equal(null);
-      should(result).be.ok;
+      post = yield post.save();
 
-      result.id.should.equal(10);
-      result.slug.should.equal('a-panhandlers-guide-to-business-life-love');
-      result.title.should.equal('Pay People What They’re Worth');
+      should(post).be.ok;
+
+      post.id.should.equal(10);
+      post.slug.should.equal('a-panhandlers-guide-to-business-life-love');
+      post.title.should.equal('Pay People What They’re Worth');
 
       done();
-    });
+    })();
   });
 
   it('should work for updated data', function(done) {
-    var post = new Yamb(data.update);
+    co(function *() {
+      var post = new Yamb(data.update);
 
-    post.created.should.be.an.instanceof(Date);
-    post.created.toISOString.should.be.type('function');
+      post.created.should.be.an.instanceof(Date);
+      post.created.toISOString.should.be.type('function');
 
-    post.tags.push('marketing');
-    post.active = false;
+      post.tags.push('marketing');
+      post.active = false;
 
-    post.save(function(error, result) {
-      should(error).equal(null);
-      should(result).be.ok;
+      post = yield post.save();
 
-      result.id.should.equal(data.update._id);
+      should(post).be.ok;
 
-      result.slug.should.equal(data.update.slug);
-      result.title.should.equal(data.update.title);
-
-      result.preview.should.equal(data.update.preview);
-      result.text.should.equal(data.update.text);
-
-      result.tags.should.contain('business');
-      result.tags.should.contain('marketing');
-
-      result.active.should.equal(false);
+      post.id.should.equal(data.update._id);
+      post.slug.should.equal(data.update.slug);
+      post.title.should.equal(data.update.title);
+      post.preview.should.equal(data.update.preview);
+      post.text.should.equal(data.update.text);
+      post.tags.should.contain('business');
+      post.tags.should.contain('marketing');
+      post.active.should.equal(false);
 
       done();
-    });
+    })();
   });
 });

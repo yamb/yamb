@@ -11,15 +11,15 @@
       "node": "~0.11"
     }
   , "dependencies": {
-        "co": "3.0.x"
-      , "clone": "0.1.x"
+        "clone": "0.1.x"
       , "marked": "0.3.x"
       , "mdash": "0.1.x"
       , "highlight.js": "7.5.x"
       , "yandex-translate": "1.0.x"
     }
   , "devDependencies": {
-        "jshint": "~2.4"
+        "co": "~3.0"
+      , "jshint": "~2.4"
       , "mocha": "~1.16"
       , "should": "~2.1"
       , "coveralls": "~2.6"
