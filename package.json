@@ -14,7 +14,7 @@
         "clone": "0.1.x"
       , "marked": "0.3.x"
       , "mdash": "0.1.x"
-      , "highlight.js": "7.5.x"
+      , "highlight.js": "8.0.x"
       , "yandex-translate": "1.0.x"
     }
   , "devDependencies": {
@@ -27,9 +27,8 @@
     }
   , "scripts": {
         "coveralls": "node --harmony ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R dot && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
-      , "jshint": "./node_modules/.bin/jshint lib"
-      , "mocha": "./node_modules/.bin/mocha --harmony --reporter dot"
-      , "test": "npm run jshint && npm run mocha"
+      , "pretest": "./node_modules/.bin/jshint lib"
+      , "test": "./node_modules/.bin/mocha --harmony --reporter dot"
     }
   , "license": "MIT"
 }
