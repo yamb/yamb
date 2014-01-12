@@ -1,4 +1,4 @@
 .jshintrc
 .travis.yml
-test
+test*
 todo.md
