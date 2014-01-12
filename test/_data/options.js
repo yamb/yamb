@@ -3,8 +3,8 @@ var options = {
   storage: require('./storage')
 };
 
-if (process.env.NODE_YAPI) {
-  options.yapi = process.env.NODE_YAPI;
+if (process.env.yapi) {
+  options.yapi = process.env.yapi;
 }
 
 module.exports = options;
