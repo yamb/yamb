@@ -1,16 +1,16 @@
-function remove(table, params, fn) {
+function remove(params, fn) {
   setImmediate(function() {
     fn(null, true);
   });
 }
 
-function removeById(table, id, fn) {
+function removeById(id, fn) {
   setImmediate(function() {
     fn(null, true);
   });
 }
 
-function save(table, params, fn) {
+function save(params, fn) {
   setImmediate(function() {
     if (!params._id && !params.id) {
       params._id = 10;
@@ -22,23 +22,25 @@ function save(table, params, fn) {
 }
 
 module.exports = {
-  find: function(table, params, options) {},
+  find: function(params, options) {},
 
-  remove: function(table, params) {
+  findById: function(id) {},
+
+  remove: function(params) {
     return function(fn) {
-      remove(table, params, fn);
+      remove(params, fn);
     };
   },
 
-  removeById: function(table, id) {
+  removeById: function(id) {
     return function(fn) {
-      remove(table, id, fn);
+      removeById(id, fn);
     };
   },
 
-  save: function(table, params) {
+  save: function(params) {
     return function(fn) {
-      save(table, params, fn);
+      save(params, fn);
     };
   }
 };
