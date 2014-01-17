@@ -1,5 +1,4 @@
 var options = {
-  dbname: 'yamb-test',
   storage: require('./storage')
 };
 
