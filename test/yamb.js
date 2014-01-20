@@ -311,7 +311,7 @@ describe('Yamb class', function() {
 
   it('should have tags list and it must be an array', function() {
     var post;
-    var poor = [undefined, NaN, null, 0, 10, true, false, [], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, 0, 10, true, false, '', [], {}, {'param': 'value'}, dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({tags: poor[i]});
@@ -326,6 +326,12 @@ describe('Yamb class', function() {
       post.tags = poor[i];
       post.tags.should.eql([]);
     }
+
+    post.tags = '  tag 1 ';
+    post.tags.should.eql(['tag 1']);
+
+    post.tags = ' tag 1, tag 2 ,  tag 3';
+    post.tags.should.eql(['tag 1', 'tag 2', 'tag 3']);
 
     post.tags = ['tag 1', 'tag 2'];
     post.tags.should.eql(['tag 1', 'tag 2']);
