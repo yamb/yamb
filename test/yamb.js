@@ -432,6 +432,9 @@ describe('Yamb class', function() {
       post.active.should.equal(schema.data.active);
     }
 
+    post = new Yamb({active: 'Y'});
+    post.active.should.equal(schema.data.active);
+
     post = new Yamb();
     post.active.should.equal(schema.data.active);
 
@@ -444,6 +447,12 @@ describe('Yamb class', function() {
     post.active.should.be.true;
 
     post.active = false;
+    post.active.should.be.false;
+
+    post.active = 'Y';
+    post.active.should.be.true;
+
+    post.active = 'N';
     post.active.should.be.false;
   });
 
