@@ -47,6 +47,19 @@ describe('Yamb class', function() {
     d.should.have.property('title', '');
   });
 
+  it('should', function() {
+    var post, json;
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb();
+      json = post.json();
+
+      post.update(poor[i]);
+      post.json().should.eql(json);
+    }
+  });
+
   it('should set id from constructor and mark it read-only', function() {
     var post;
 
@@ -330,7 +343,7 @@ describe('Yamb class', function() {
     post.tags = '  tag 1 ';
     post.tags.should.eql(['tag 1']);
 
-    post.tags = ' tag 1, tag 2 ,  tag 3';
+    post.tags = ' tag 1,, tag 2 ,  tag 3';
     post.tags.should.eql(['tag 1', 'tag 2', 'tag 3']);
 
     post.tags = ['tag 1', 'tag 2'];
@@ -358,6 +371,12 @@ describe('Yamb class', function() {
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({stats: poor[i]});
+      shouldStatistics(post.stats, 0, 0, 0);
+    }
+
+    for (var i=0, length=poor.length; i<length; i++) {
+      post = new Yamb();
+      post.stats = poor[i];
       shouldStatistics(post.stats, 0, 0, 0);
     }
 
