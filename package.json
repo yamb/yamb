@@ -1,6 +1,6 @@
 {
     "name": "yamb"
-  , "version": "0.0.5"
+  , "version": "0.0.6"
   , "description": "Yamb"
   , "author": "Alexey Simonenko <alexey@simonenko.su>"
   , "main": "./lib/index"
