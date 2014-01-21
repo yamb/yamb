@@ -129,8 +129,8 @@ describe('Yamb save()', function() {
       post.title.should.equal(data.update.title);
       post.preview.should.equal(data.update.preview);
       post.text.should.equal(data.update.text);
-      post.tags.should.contain('business');
-      post.tags.should.contain('marketing');
+      post.tags.should.containEql('business');
+      post.tags.should.containEql('marketing');
       post.active.should.equal(false);
 
       done();
