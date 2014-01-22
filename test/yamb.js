@@ -291,7 +291,7 @@ describe('Yamb class', function() {
 
   it('should have related list and it must be an array', function() {
     var post;
-    var poor = [undefined, NaN, null, true, false, {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, false, true, [], [{'param': 'value'}], {}, {'param': 'value'}, dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb({related: poor[i]});
@@ -307,19 +307,37 @@ describe('Yamb class', function() {
       post.related.should.eql([]);
     }
 
+    var a = new Yamb();
+    var b = new Yamb(data.update);
+    var c = new Yamb();
+    c.update(data.create);
+
+    post = new Yamb();
     post.related = 10;
     post.related.should.eql([10]);
 
+    post = new Yamb();
     post.related = '10';
     post.related.should.eql(['10']);
 
-    var a = new Yamb();
+    post.related = [];
+    post.related.should.eql([]);
 
+    post = new Yamb();
     post.related = a;
-    post.related.should.eql([a]);
+    post.related.should.eql([]);
 
-    post.related = [10, null, '10', a, {}, dummy];
-    post.related.should.eql([10, '10', a]);
+    post = new Yamb();
+    post.related = b;
+    post.related.should.eql([100]);
+
+    post = new Yamb();
+    post.related = [a, b, c];
+    post.related.should.eql([100]);
+
+    post = new Yamb();
+    post.related = [10, null, '10', a, {}, b, dummy, c];
+    post.related.should.eql([10, '10', 100]);
   });
 
   it('should have tags list and it must be an array', function() {
