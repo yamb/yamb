@@ -47,7 +47,7 @@ describe('Yamb class', function() {
     d.should.have.property('title', '');
   });
 
-  it('should', function() {
+  it('should not update properties with bad params', function() {
     var post, json;
     var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
 
@@ -64,7 +64,7 @@ describe('Yamb class', function() {
     var post;
 
     post = new Yamb();
-    (function() { post.id; }).should.throw();
+    post.id.should.be.false;
 
     post = new Yamb({id: 10});
     post.should.have.property('id', 10);
@@ -116,8 +116,7 @@ describe('Yamb class', function() {
 
     post = new Yamb();
     post.update(data.create);
-
-    (function() { post.id; }).should.throw();
+    post.id.should.be.false;
 
     post.should.not.have.property('video');
     post.should.not.have.property('params');
