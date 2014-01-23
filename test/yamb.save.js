@@ -4,6 +4,24 @@ var should = require('should');
 var options = require('./_data/options');
 var data = require('./_data/data');
 
+function pad(num) {
+  if (num < 10) {
+    return '0' + num;
+  } else {
+    return num;
+  }
+}
+
+function yambUri(created, slug) {
+  var uri = [
+    created.getFullYear(),
+    pad(created.getMonth() + 1),
+    slug
+  ];
+
+  return '/' + uri.join('/');
+}
+
 describe('Yamb save()', function() {
   var Yamb = require('./../lib/yamb/index')(options);
 
@@ -51,12 +69,12 @@ describe('Yamb save()', function() {
     })();
   });
 
-  it('should throw error if only slug exists', function(done) {
+  it('should throw error if only uri exists', function(done) {
     co(function *() {
       var post = new Yamb();
       var error = null;
 
-      post.slug = 'what\'s new in 2014 year';
+      post.uri = 'what\'s new in 2014 year';
 
       try {
         post = yield post.save();
@@ -73,7 +91,7 @@ describe('Yamb save()', function() {
     })();
   });
 
-  it('should get slug from yandex translate', function(done) {
+  it('should get uri from yandex translate', function(done) {
     co(function *() {
       var post = new Yamb();
 
@@ -85,7 +103,7 @@ describe('Yamb save()', function() {
       should(post).be.ok;
 
       post.id.should.equal(10);
-      post.slug.should.equal('title-2014');
+      post.uri.should.equal(yambUri(post.created, 'title-2014'));
       post.preview.should.equal('text 1');
       post.text.should.equal('text 1\n\ntext 2');
 
@@ -103,7 +121,7 @@ describe('Yamb save()', function() {
       should(post).be.ok;
 
       post.id.should.equal(10);
-      post.slug.should.equal('a-panhandlers-guide-to-business-life-love');
+      post.uri.should.equal(yambUri(post.created, 'a-panhandlers-guide-to-business-life-love'));
       post.title.should.equal('Pay People What They’re Worth');
 
       done();
@@ -125,7 +143,7 @@ describe('Yamb save()', function() {
       should(post).be.ok;
 
       post.id.should.equal(data.update._id);
-      post.slug.should.equal(data.update.slug);
+      post.uri.should.equal(data.update.uri);
       post.title.should.equal(data.update.title);
       post.preview.should.equal(data.update.preview);
       post.text.should.equal(data.update.text);
