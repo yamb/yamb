@@ -87,7 +87,7 @@ describe('Yamb save()', function() {
       post.id.should.equal(10);
       post.slug.should.equal('title-2014');
       post.preview.should.equal('text 1');
-      post.text.should.equal('text 2');
+      post.text.should.equal('text 1\n\ntext 2');
 
       done();
     })();
