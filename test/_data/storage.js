@@ -21,6 +21,12 @@ function save(params, fn) {
   });
 }
 
+function update(params, data, fn) {
+  setImmediate(function() {
+    fn(null, true);
+  });
+}
+
 module.exports = {
   find: function(params, options) {},
 
@@ -41,6 +47,12 @@ module.exports = {
   save: function(params) {
     return function(fn) {
       save(params, fn);
+    };
+  },
+
+  update: function(params, data) {
+    return function(fn) {
+      update(params, data, fn);
     };
   }
 };

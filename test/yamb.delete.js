@@ -11,9 +11,10 @@ describe('Yamb delete()', function() {
     co(function *() {
       var post = new Yamb();
       var error = null;
+      var result;
 
       try {
-        var result = yield post.remove();
+        result = yield post.remove();
       } catch (err) {
         error = err;
       }
@@ -30,11 +31,12 @@ describe('Yamb delete()', function() {
     co(function *() {
       var post = new Yamb();
       var error = null;
+      var result;
 
       post.update(data.create);
 
       try {
-        var result = yield post.remove();
+        result = yield post.remove();
       } catch (err) {
         error = err;
       }
