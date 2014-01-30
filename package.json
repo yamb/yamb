@@ -14,7 +14,7 @@
   , "dependencies": {
         "clone": "0.1.x"
       , "marked": "0.3.x"
-      , "mdash": "0.1.x"
+      , "mdash": "~0.1.1"
       , "highlight.js": "8.0.x"
       , "yandex-translate": "1.0.x"
     }
