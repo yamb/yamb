@@ -268,34 +268,35 @@ describe('Yamb class', function() {
     var post, i, length;
     var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
 
-    function shouldAuthor(author, name, email) {
+    function shouldAuthor(author, name, email, url) {
       author.should.be.an.instanceof(Object);
       author.should.have.property('name', name);
       author.should.have.property('email', email);
+      author.should.have.property('url', url);
     }
 
     for (i=0, length=poor.length; i<length; i++) {
       post = new Yamb({author: poor[i]});
-      shouldAuthor(post.author, '', '');
+      shouldAuthor(post.author, '', '', '');
     }
 
     post = new Yamb();
-    shouldAuthor(post.author, '', '');
+    shouldAuthor(post.author, '', '', '');
 
     for (i=0, length=poor.length; i<length; i++) {
       post.author = poor[i];
-      shouldAuthor(post.author, '', '');
+      shouldAuthor(post.author, '', '', '');
     }
 
     post = new Yamb();
     post.author = 'Alexey Simonenko';
-    shouldAuthor(post.author, 'Alexey Simonenko', '');
+    shouldAuthor(post.author, 'Alexey Simonenko', '', '');
 
     post.author = {email: 'alexey@simonenko.su'};
-    shouldAuthor(post.author, 'Alexey Simonenko', 'alexey@simonenko.su');
+    shouldAuthor(post.author, 'Alexey Simonenko', 'alexey@simonenko.su', '');
 
     post.author = {name: 'Alexey', email: 'dwarfman@gmail.com'};
-    shouldAuthor(post.author, 'Alexey', 'dwarfman@gmail.com');
+    shouldAuthor(post.author, 'Alexey', 'dwarfman@gmail.com', '');
 
     var author = post.author;
     author.name = 'Alexey Simonenko';
