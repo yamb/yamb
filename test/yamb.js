@@ -452,6 +452,9 @@ describe('Yamb class', function() {
     a.stats.views++;
     a.stats.views.should.eql(12);
 
+    delete a.stats.views;
+    a.stats.views.should.eql(12);
+
     var b = new Yamb();
     shouldStatistics(b.stats, 0, 0, 0);
 
