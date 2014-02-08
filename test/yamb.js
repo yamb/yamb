@@ -270,9 +270,11 @@ describe('Yamb class', function() {
 
     function shouldAuthor(author, name, email, url) {
       author.should.be.an.instanceof(Object);
-      author.should.have.property('name', name);
-      author.should.have.property('email', email);
-      author.should.have.property('url', url);
+      author.should.have.properties(['name', 'email', 'url']);
+
+      author.name.should.eql(name);
+      author.email.should.eql(email);
+      author.url.should.eql(url);
     }
 
     for (i=0, length=poor.length; i<length; i++) {
@@ -292,19 +294,33 @@ describe('Yamb class', function() {
     post.author = 'Alexey Simonenko';
     shouldAuthor(post.author, 'Alexey Simonenko', '', '');
 
-    post.author = {email: 'alexey@simonenko.su'};
+    post.author = {gender: 'm', email: 'alexey@simonenko.su', surname: 'Simonenko'};
     shouldAuthor(post.author, 'Alexey Simonenko', 'alexey@simonenko.su', '');
 
-    post.author = {name: 'Alexey', email: 'dwarfman@gmail.com'};
-    shouldAuthor(post.author, 'Alexey', 'dwarfman@gmail.com', '');
+    post.author = {name: '', email: ' dwarfman@gmail.com '};
+    shouldAuthor(post.author, '', 'dwarfman@gmail.com', '');
 
     var author = post.author;
-    author.name = 'Alexey Simonenko';
-    post.author.name.should.equal('Alexey');
+    author.name = '\n Alexey Simonenko \n\n ';
+    post.author.name.should.equal('Alexey Simonenko');
 
-    post = new Yamb();
-    post.author.name = 'Alexey Simonenko';
-    post.author.name.should.equal('');
+    delete author.name;
+    post.author.name.should.equal('Alexey Simonenko');
+
+    delete post.author.name;
+    post.author.name.should.equal('Alexey Simonenko');
+
+    post = new Yamb({author: {name: 'Alexey', email: 'alexey@simonenko.su', url: 'http://simonenko.su'}});
+    shouldAuthor(post.author, 'Alexey', 'alexey@simonenko.su', 'http://simonenko.su');
+
+    post.author = '';
+    shouldAuthor(post.author, 'Alexey', 'alexey@simonenko.su', 'http://simonenko.su');
+
+    post.author = ' Alexey Simonenko ';
+    shouldAuthor(post.author, 'Alexey Simonenko', 'alexey@simonenko.su', 'http://simonenko.su');
+
+    post.author = {name: '  ', email: '\n \n', url: ''};
+    shouldAuthor(post.author, '', '', '');
   });
 
   it('should have related list and it must be an array', function() {
@@ -540,6 +556,5 @@ describe('Yamb class', function() {
     json.created.toISOString.should.be.type('function');
   });
 
-  // uri: ''
   // snippets: {}
 });
