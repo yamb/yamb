@@ -1,13 +1,11 @@
 var should = require('should');
 var co = require('co');
 
-var options = require('./helpers/options');
-
 var data = require('./_data/data');
 
-describe('Yamb EMT typographer', function() {
-  var Yamb = require('./../lib/yamb/index')(options);
+var Yamb = require('./helpers/yamb');
 
+describe('Yamb EMT typographer', function() {
   it('should update title', function(done) {
     co(function *() {
       var post = new Yamb();

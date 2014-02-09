@@ -6,4 +6,4 @@ if (process.env.yapi) {
   options.yapi = process.env.yapi;
 }
 
-module.exports = options;
+module.exports = require('./../../lib/yamb')(options);

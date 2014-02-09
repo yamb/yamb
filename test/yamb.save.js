@@ -1,14 +1,12 @@
 var should = require('should');
 var co = require('co');
 
-var options = require('./helpers/options');
 var utils = require('./helpers/utils');
-
 var data = require('./_data/data');
 
-describe('Yamb save()', function() {
-  var Yamb = require('./../lib/yamb/index')(options);
+var Yamb = require('./helpers/yamb');
 
+describe('Yamb save()', function() {
   it('should throw error if only title exists', function(done) {
     co(function *() {
       var post = new Yamb();

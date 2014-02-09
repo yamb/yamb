@@ -1,20 +1,15 @@
 var should = require('should');
 
-var options = require('./helpers/options');
 var schema = require('./helpers/schema');
 var utils = require('./helpers/utils');
-
 var data = require('./_data/data');
 
-describe('Yamb class', function() {
-  var Yamb = require('./../lib/yamb/index')(options);
+var Yamb = require('./helpers/yamb');
 
+describe('Yamb class', function() {
   it('should have default property', function() {
     var post = new Yamb();
-
     post.should.have.properties(schema.keys);
-
-    post.snippets.should.be.an.instanceof(Object);
   });
 
   it('should not give to overload methods', function() {
