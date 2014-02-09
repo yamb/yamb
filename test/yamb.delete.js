@@ -1,7 +1,8 @@
-var co = require('co');
 var should = require('should');
+var co = require('co');
 
-var options = require('./_data/options');
+var options = require('./helpers/options');
+
 var data = require('./_data/data');
 
 describe('Yamb delete()', function() {

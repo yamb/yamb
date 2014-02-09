@@ -15,3 +15,5 @@ exports.yambUri = function(date, slug) {
 
   return '/' + uri.join('/');
 };
+
+exports.dummy = function() {};

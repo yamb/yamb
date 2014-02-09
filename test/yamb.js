@@ -1,28 +1,10 @@
 var should = require('should');
 
-var options = require('./_data/options');
-var schema = require('./_data/schema');
+var options = require('./helpers/options');
+var schema = require('./helpers/schema');
+var utils = require('./helpers/utils');
+
 var data = require('./_data/data');
-
-var dummy = function() {};
-
-function pad(num) {
-  if (num < 10) {
-    return '0' + num;
-  } else {
-    return num;
-  }
-}
-
-function yambUri(created, slug) {
-  var uri = [
-    created.getFullYear(),
-    pad(created.getMonth() + 1),
-    slug
-  ];
-
-  return '/' + uri.join('/');
-}
 
 describe('Yamb class', function() {
   var Yamb = require('./../lib/yamb/index')(options);
@@ -38,17 +20,17 @@ describe('Yamb class', function() {
   it('should not give to overload methods', function() {
     var post = new Yamb();
 
-    post.update = dummy;
-    post.update.should.not.equal(dummy);
+    post.update = utils.dummy;
+    post.update.should.not.equal(utils.dummy);
 
-    post.save = dummy;
-    post.save.should.not.equal(dummy);
+    post.save = utils.dummy;
+    post.save.should.not.equal(utils.dummy);
 
-    post.remove = dummy;
-    post.remove.should.not.equal(dummy);
+    post.remove = utils.dummy;
+    post.remove.should.not.equal(utils.dummy);
 
-    post.json = dummy;
-    post.json.should.not.equal(dummy);
+    post.json = utils.dummy;
+    post.json.should.not.equal(utils.dummy);
   });
 
   it('should update property from constructor', function() {
@@ -67,7 +49,7 @@ describe('Yamb class', function() {
 
   it('should not update properties with bad params', function() {
     var post, json;
-    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, utils.dummy];
 
     for (var i=0, length=poor.length; i<length; i++) {
       post = new Yamb();
@@ -107,7 +89,7 @@ describe('Yamb class', function() {
     var post = new Yamb();
     post.update(data.create);
 
-    post.should.have.property('uri', yambUri(post.created, 'a-panhandlers-guide-to-business-life-love'));
+    post.should.have.property('uri', utils.yambUri(post.created, 'a-panhandlers-guide-to-business-life-love'));
     post.should.have.property('title', "Pay People What They're Worth");
 
     post.tags.should.be.an.instanceof(Array).and.have.length(1);
@@ -142,7 +124,7 @@ describe('Yamb class', function() {
 
   it('should have uri and it must be [a-z0-9] string', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, false, true, ' ', [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, false, true, ' ', [], ['1', '2', '3'], {}, {'param': 'value'}, utils.dummy];
 
     for (i=0, length=poor.length; i<length; i++) {
       post = new Yamb({uri: poor[i]});
@@ -161,21 +143,21 @@ describe('Yamb class', function() {
     post.uri.should.be.false;
 
     post.uri = 'Нужны ли классы в JavaScript?';
-    post.uri.should.equal(yambUri(post.created, 'javascript'));
+    post.uri.should.equal(utils.yambUri(post.created, 'javascript'));
 
     post.uri = '  Use CSS3  box-sizing-';
-    post.uri.should.equal(yambUri(post.created, 'use-css3-box-sizing'));
+    post.uri.should.equal(utils.yambUri(post.created, 'use-css3-box-sizing'));
 
     post.uri = 'Use CSS3   box-sizing-';
-    post.uri.should.equal(yambUri(post.created, 'use-css3-box-sizing'));
+    post.uri.should.equal(utils.yambUri(post.created, 'use-css3-box-sizing'));
 
     post.uri = '_use_CSS3_box-sizing_   in   2014?';
-    post.uri.should.equal(yambUri(post.created, 'use-css3-box-sizing-in-2014'));
+    post.uri.should.equal(utils.yambUri(post.created, 'use-css3-box-sizing-in-2014'));
   });
 
   it('should have title and it must be a string', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, false, true, ' ', [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, false, true, ' ', [], ['1', '2', '3'], {}, {'param': 'value'}, utils.dummy];
 
     for (i=0, length=poor.length; i<length; i++) {
       post = new Yamb({title: poor[i]});
@@ -199,7 +181,7 @@ describe('Yamb class', function() {
 
   it('should have preview and it must be a string', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, false, true, ' ', [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, false, true, ' ', [], ['1', '2', '3'], {}, {'param': 'value'}, utils.dummy];
 
     for (i=0, length=poor.length; i<length; i++) {
       post = new Yamb({preview: poor[i]});
@@ -223,7 +205,7 @@ describe('Yamb class', function() {
 
   it('should have text and it must be a string', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, false, true, ' ', [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, false, true, ' ', [], ['1', '2', '3'], {}, {'param': 'value'}, utils.dummy];
 
     for (i=0, length=poor.length; i<length; i++) {
       post = new Yamb({text: poor[i]});
@@ -266,7 +248,7 @@ describe('Yamb class', function() {
 
   it('should have author and it must be an specific object', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, false, true, [], ['1', '2', '3'], {}, {'param': 'value'}, utils.dummy];
 
     function shouldAuthor(author, name, email, url) {
       author.should.be.an.instanceof(Object);
@@ -325,7 +307,7 @@ describe('Yamb class', function() {
 
   it('should have related list and it must be an array', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, false, true, [], [{'param': 'value'}], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, false, true, [], [{'param': 'value'}], {}, {'param': 'value'}, utils.dummy];
 
     for (i=0, length=poor.length; i<length; i++) {
       post = new Yamb({related: poor[i]});
@@ -370,13 +352,13 @@ describe('Yamb class', function() {
     post.related.should.eql([100]);
 
     post = new Yamb();
-    post.related = [10, null, '10', a, {}, b, dummy, c];
+    post.related = [10, null, '10', a, {}, b, utils.dummy, c];
     post.related.should.eql([10, '10', 100]);
   });
 
   it('should have tags list and it must be an array', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, 0, 10, true, false, [], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, 0, 10, true, false, [], {}, {'param': 'value'}, utils.dummy];
 
     for (i=0, length=poor.length; i<length; i++) {
       post = new Yamb({tags: poor[i]});
@@ -419,7 +401,7 @@ describe('Yamb class', function() {
 
   it('should have statistics params', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, true, false, [], [10, 20], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, true, false, [], [10, 20], {}, {'param': 'value'}, utils.dummy];
 
     function shouldStatistics(stats, views, likes, comments) {
       stats.should.be.an.instanceof(Object);
@@ -484,7 +466,7 @@ describe('Yamb class', function() {
   it('should have create time and it must be a date', function() {
     var post, current;
 
-    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}, utils.dummy];
 
     var string = '2013-12-17 1:52';
     var object = new Date(string);
@@ -514,7 +496,7 @@ describe('Yamb class', function() {
 
   it('should have active property and it must be a boolean', function() {
     var post, i, length;
-    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}, dummy];
+    var poor = [undefined, NaN, null, 0, 10, '', 'string', [], ['1', '2', '3'], {}, {'param': 'value'}, utils.dummy];
 
     for (i=0, length=poor.length; i<length; i++) {
       post = new Yamb({active: poor[i]});

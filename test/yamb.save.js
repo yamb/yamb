@@ -1,26 +1,10 @@
-var co = require('co');
 var should = require('should');
+var co = require('co');
 
-var options = require('./_data/options');
+var options = require('./helpers/options');
+var utils = require('./helpers/utils');
+
 var data = require('./_data/data');
-
-function pad(num) {
-  if (num < 10) {
-    return '0' + num;
-  } else {
-    return num;
-  }
-}
-
-function yambUri(created, slug) {
-  var uri = [
-    created.getFullYear(),
-    pad(created.getMonth() + 1),
-    slug
-  ];
-
-  return '/' + uri.join('/');
-}
 
 describe('Yamb save()', function() {
   var Yamb = require('./../lib/yamb/index')(options);
@@ -103,7 +87,7 @@ describe('Yamb save()', function() {
       should(post).be.ok;
 
       post.id.should.equal(10);
-      post.uri.should.equal(yambUri(post.created, 'title-2014'));
+      post.uri.should.equal(utils.yambUri(post.created, 'title-2014'));
       post.preview.should.equal('text 1');
       post.text.should.equal('text 1\n\ntext 2');
 
@@ -121,7 +105,7 @@ describe('Yamb save()', function() {
       should(post).be.ok;
 
       post.id.should.equal(10);
-      post.uri.should.equal(yambUri(post.created, 'a-panhandlers-guide-to-business-life-love'));
+      post.uri.should.equal(utils.yambUri(post.created, 'a-panhandlers-guide-to-business-life-love'));
       post.title.should.equal('Pay People What They’re Worth');
 
       done();
