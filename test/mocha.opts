@@ -4,7 +4,4 @@
 --bail
 --check-leaks
 
-test/yamb.js
-test/yamb.save.js
-test/yamb.delete.js
-test/yamb.mdash.js
+test/test.js
