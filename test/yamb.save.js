@@ -1,139 +1,104 @@
-var should = require('should');
 var co = require('co');
 
-var utils = require('./helpers/utils');
-var data = require('./_data/data');
+it('should create a new object', function(done) {
+  co(function *() {
+    var a = new Yamb();
 
-var Yamb = require('./helpers/yamb');
+    a.update(data.create);
 
-describe('Yamb save()', function() {
-  it('should throw error if only title exists', function(done) {
-    co(function *() {
-      var post = new Yamb();
-      var error = null;
+    a = yield a.save();
 
-      post.title = 'title';
+    a.should.be.ok;
+    a.id.should.equal(10);
+    a.uri.should.equal(utils.yambUri(a.created, 'a-panhandlers-guide-to-business-life-love'));
+    a.title.should.equal('Pay People What They’re Worth');
 
-      try {
-        post = yield post.save();
-      } catch (err) {
-        post = false;
-        error = err;
-      }
+    done();
+  })();
+});
 
-      should(error).not.equal(null);
-      should(error).be.an.instanceOf(Error);
-      should(post).not.be.ok;
+it('should update an existing object', function(done) {
+  co(function *() {
+    var a = new Yamb(data.update);
 
-      done();
-    })();
-  });
+    a.tags.push('marketing');
+    a.active = false;
 
-  it('should throw error if only preview/text exists', function(done) {
-    co(function *() {
-      var post = new Yamb();
-      var error = null;
+    a = yield a.save();
 
-      post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+    a.should.be.ok;
+    a.id.should.equal(data.update._id);
+    a.uri.should.equal(data.update.uri);
+    a.title.should.equal(data.update.title);
+    a.preview.should.equal(data.update.preview);
+    a.text.should.equal(data.update.text);
+    a.tags.should.containEql('business');
+    a.tags.should.containEql('marketing');
+    a.active.should.equal(false);
 
-      try {
-        post = yield post.save();
-      } catch (err) {
-        post = false;
-        error = err;
-      }
+    done();
+  })();
+});
 
-      should(error).not.equal(null);
-      should(error).be.an.instanceOf(Error);
-      should(post).not.be.ok;
+it('should auto create uri from translation service', function(done) {
+  co(function *() {
+    var a = new Yamb();
 
-      done();
-    })();
-  });
+    a.title = 'Заголовок 2014';
+    a.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
 
-  it('should throw error if only uri exists', function(done) {
-    co(function *() {
-      var post = new Yamb();
-      var error = null;
+    a = yield a.save();
 
-      post.uri = 'what\'s new in 2014 year';
+    a.should.be.ok;
+    a.id.should.equal(10);
+    a.uri.should.equal(utils.yambUri(a.created, 'title-2014'));
+    a.preview.should.equal('text 1');
+    a.text.should.equal('text 1\n\ntext 2');
 
-      try {
-        post = yield post.save();
-      } catch (err) {
-        post = false;
-        error = err;
-      }
+    done();
+  })();
+});
 
-      should(error).not.equal(null);
-      should(error).be.an.instanceOf(Error);
-      should(post).not.be.ok;
+it('should throw error if text empty', function(done) {
+  co(function *() {
+    var a = new Yamb();
+    var e = null;
 
-      done();
-    })();
-  });
+    a.title = 'title';
 
-  it('should get uri from yandex translate', function(done) {
-    co(function *() {
-      var post = new Yamb();
+    try {
+      a = yield a.save();
+    } catch (err) {
+      a = false;
+      e = err;
+    }
 
-      post.title = 'Заголовок 2014';
-      post.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
+    e.should.not.equal(null);
+    e.should.be.an.instanceof(Error);
+    a.should.not.be.ok;
 
-      post = yield post.save();
+    done();
+  })();
+});
 
-      should(post).be.ok;
+it('should throw error if title empty', function(done) {
+  co(function *() {
+    var a = new Yamb();
+    var e = null;
 
-      post.id.should.equal(10);
-      post.uri.should.equal(utils.yambUri(post.created, 'title-2014'));
-      post.preview.should.equal('text 1');
-      post.text.should.equal('text 1\n\ntext 2');
+    a.text = ' \n\n text 1\n\ntext 2   \n\n\n  \n \n  ';
 
-      done();
-    })();
-  });
+    try {
+      a = yield a.save();
+    } catch (err) {
+      a = false;
+      e = err;
+    }
 
-  it('should work for new data', function(done) {
-    co(function *() {
-      var post = new Yamb();
-      post.update(data.create);
+    e.should.not.equal(null);
+    e.should.be.an.instanceof(Error);
+    a.should.not.be.ok;
 
-      post = yield post.save();
-
-      should(post).be.ok;
-
-      post.id.should.equal(10);
-      post.uri.should.equal(utils.yambUri(post.created, 'a-panhandlers-guide-to-business-life-love'));
-      post.title.should.equal('Pay People What They’re Worth');
-
-      done();
-    })();
-  });
-
-  it('should work for updated data', function(done) {
-    co(function *() {
-      var post = new Yamb(data.update);
-
-      post.created.should.be.an.instanceof(Date);
-      post.created.toISOString.should.be.type('function');
-
-      post.tags.push('marketing');
-      post.active = false;
-
-      post = yield post.save();
-
-      should(post).be.ok;
-
-      post.id.should.equal(data.update._id);
-      post.uri.should.equal(data.update.uri);
-      post.title.should.equal(data.update.title);
-      post.preview.should.equal(data.update.preview);
-      post.text.should.equal(data.update.text);
-      post.tags.should.containEql('business');
-      post.tags.should.containEql('marketing');
-      post.active.should.equal(false);
-
-      done();
-    })();
-  });
+    done();
+  })();
 });

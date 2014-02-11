@@ -1,6 +1,4 @@
 describe('Yamb', function() {
-  should = require('should');
-
   schema = require('./helpers/schema');
   utils = require('./helpers/utils');
   data = require('./_data/data');
@@ -26,6 +24,10 @@ describe('Yamb', function() {
 
     describe('#update()', function() {
       require('./yamb.update');
+    });
+
+    describe('#save()', function() {
+      require('./yamb.save');
     });
 
     describe('#json()', function() {
