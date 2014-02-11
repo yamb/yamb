@@ -5,3 +5,4 @@
 --check-leaks
 
 test/test.js
+test/mdash.js
