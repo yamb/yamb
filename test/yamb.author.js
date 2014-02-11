@@ -31,7 +31,7 @@ it('should updated from an object', function() {
   a.author = {
     name: '',
     url: '\n \n http://simonenko.su'
-  }
+  };
 
   assert(a, '', 'alexey@simonenko.su', 'http://simonenko.su');
 });

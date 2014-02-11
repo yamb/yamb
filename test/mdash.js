@@ -1,5 +1,4 @@
 describe('EMT typographer', function() {
-  var should = require('should');
   var co = require('co');
 
   var data = require('./_data/data');

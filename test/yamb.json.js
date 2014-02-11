@@ -20,7 +20,7 @@ it('should not have properties outside the schema', function() {
 
   var json = a.json();
 
-  a.should.not.have.property('param1');
-  a.should.not.have.property('param2');
-  a.should.not.have.property('param3');
+  json.should.not.have.property('param1');
+  json.should.not.have.property('param2');
+  json.should.not.have.property('param3');
 });
