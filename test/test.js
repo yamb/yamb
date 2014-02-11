@@ -14,4 +14,12 @@ describe('Yamb', function() {
   describe('#constructor()', function() {
     require('./yamb.constructor');
   });
+
+  describe('#update()', function() {
+    require('./yamb.update');
+  });
+
+  describe('#json()', function() {
+    require('./yamb.json');
+  });
 });
