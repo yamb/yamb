@@ -24,7 +24,7 @@ it('should not update properties with unexpected values', function() {
   }
 });
 
-it('should not have properties outside the schema', function() {
+it('should not to have properties outside the schema', function() {
   var a = new Yamb({
     param1: 'value 1',
     param2: 'value 2',
