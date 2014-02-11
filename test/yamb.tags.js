@@ -35,15 +35,19 @@ it('should be able to clean', function() {
   assert(a, []);
 });
 
-it('should not update with unexpected values', function() {
-  var a, i, length;
+it('should not update with unexpected values from constructor', function() {
+  var a;
 
-  for (i=0, length=poor.length; i<length; i++) {
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({tags: poor[i]});
     assert(a, schema.data.tags);
   }
+});
 
-  for (i=0, length=poor.length; i<length; i++) {
+it('should not update with unexpected values from setter', function() {
+  var a;
+
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb();
     a.tags = poor[i];
 

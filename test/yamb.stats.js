@@ -46,18 +46,11 @@ it('should not be able to delete a property', function() {
   a.stats.likes.should.equal(100);
 });
 
-it('should not update with unexpected values', function() {
-  var a, i, length;
+it('should not update with unexpected values from constructor', function() {
+  var a;
 
-  for (i=0, length=poor.length; i<length; i++) {
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({stats: poor[i]});
-    assert(a, schema.data.stats.views, schema.data.stats.likes, schema.data.stats.comments);
-  }
-
-  for (i=0, length=poor.length; i<length; i++) {
-    a = new Yamb();
-    a.stats = poor[i];
-
     assert(a, schema.data.stats.views, schema.data.stats.likes, schema.data.stats.comments);
   }
 
@@ -68,4 +61,15 @@ it('should not update with unexpected values', function() {
   }});
 
   assert(a, schema.data.stats.views, schema.data.stats.likes, schema.data.stats.comments);
+});
+
+it('should not update with unexpected values from setter', function() {
+  var a;
+
+  for (var i=0, length=poor.length; i<length; i++) {
+    a = new Yamb();
+    a.stats = poor[i];
+
+    assert(a, schema.data.stats.views, schema.data.stats.likes, schema.data.stats.comments);
+  }
 });

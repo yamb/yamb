@@ -51,15 +51,19 @@ it('should not to have a setter', function() {
   assert(a, date);
 });
 
-it('should not update with unexpected values', function() {
-  var a, i, length, date;
+it('should not update with unexpected values from constructor', function() {
+  var a;
 
-  for (i=0, length=poor.length; i<length; i++) {
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({created: poor[i]});
     assert(a, new Date());
   }
+});
 
-  for (i=0, length=poor.length; i<length; i++) {
+it('should not update with unexpected values from setter', function() {
+  var a, date;
+
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb();
 
     date = a.created;

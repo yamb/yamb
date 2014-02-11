@@ -49,18 +49,11 @@ it('should not be able to delete a property', function() {
   a.author.name.should.equal('Alexey');
 });
 
-it('should not update with unexpected values', function() {
-  var a, i, length;
+it('should not update with unexpected values from constructor', function() {
+  var a;
 
-  for (i=0, length=poor.length; i<length; i++) {
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({author: poor[i]});
-    assert(a, schema.data.author.name, schema.data.author.email, schema.data.author.url);
-  }
-
-  for (i=0, length=poor.length; i<length; i++) {
-    a = new Yamb();
-    a.author = poor[i];
-
     assert(a, schema.data.author.name, schema.data.author.email, schema.data.author.url);
   }
 
@@ -72,4 +65,15 @@ it('should not update with unexpected values', function() {
   }});
 
   assert(a, schema.data.author.name, schema.data.author.email, schema.data.author.url);
+});
+
+it('should not update with unexpected values from setter', function() {
+  var a;
+
+  for (var i=0, length=poor.length; i<length; i++) {
+    a = new Yamb();
+    a.author = poor[i];
+
+    assert(a, schema.data.author.name, schema.data.author.email, schema.data.author.url);
+  }
 });

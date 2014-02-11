@@ -27,15 +27,19 @@ it('should update preview if they undefined', function() {
   a.text.should.equal('text 1\n\ntext 2');
 });
 
-it('should not update with unexpected values', function() {
-  var a, i, length;
+it('should not update with unexpected values from constructor', function() {
+  var a;
 
-  for (i=0, length=poor.length; i<length; i++) {
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({text: poor[i]});
     a.text.should.equal(schema.data.text);
   }
+});
 
-  for (i=0, length=poor.length; i<length; i++) {
+it('should not update with unexpected values from setter', function() {
+  var a;
+
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb();
     a.text = poor[i];
 

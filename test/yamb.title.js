@@ -10,15 +10,19 @@ it('should works', function() {
   a.title.should.equal('title');
 });
 
-it('should not update with unexpected values', function() {
-  var a, i, length;
+it('should not update with unexpected values from constructor', function() {
+  var a;
 
-  for (i=0, length=poor.length; i<length; i++) {
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({title: poor[i]});
     a.title.should.equal(schema.data.title);
   }
+});
 
-  for (i=0, length=poor.length; i<length; i++) {
+it('should not update with unexpected values from setter', function() {
+  var a;
+
+  for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb();
     a.title = poor[i];
 
