@@ -30,6 +30,10 @@ describe('Yamb', function() {
       require('./yamb.save');
     });
 
+    describe('#delete()', function() {
+      require('./yamb.delete');
+    });
+
     describe('#json()', function() {
       require('./yamb.json');
     });
