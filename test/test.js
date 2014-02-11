@@ -7,6 +7,14 @@ describe('Yamb', function() {
 
   Yamb = require('./helpers/yamb');
 
+  var props = ['id', 'uri', 'title', 'preview', 'text', 'author', 'related', 'tags', 'stats', 'created', 'active'];
+
+  for (var i=0, length=props.length; i<length; i++) {
+    describe(props[i] + ' property', function() {
+      require('./yamb.' + props[i]);
+    });
+  }
+
   describe('methods', function() {
     require('./yamb.methods');
   });
