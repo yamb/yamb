@@ -21,7 +21,7 @@ it('should update an existing object', function(done) {
   co(function *() {
     var a = new Yamb(data.update);
 
-    a.tags.push('marketing');
+    a.tags = ['business', 'marketing'];
     a.active = false;
 
     a = yield a.save();
