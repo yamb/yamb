@@ -19,7 +19,7 @@
       , "yandex-translate": "1.0.x"
     }
   , "devDependencies": {
-        "co": "~3.0"
+        "co": "~3.0.4"
       , "jshint": "~2.4"
       , "mocha": "~1.17"
       , "should": "~3.1"
