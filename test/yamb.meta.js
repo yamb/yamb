@@ -1,4 +1,4 @@
-var poor = utils.unexpected({bool: true, arr: true, num: true});
+var poor = utils.unexpected({bool: true, arr: true, num: true, str: true});
 
 function assert(a, title, description, keywords) {
   a.meta.should.be.an.instanceof(Object);
@@ -12,7 +12,7 @@ function assert(a, title, description, keywords) {
 it('should works', function() {
   var a = new Yamb();
 
-  a.meta = 'Title';
+  a.meta = {title: 'Title'};
   assert(a, 'Title', '', '');
 });
 
@@ -38,7 +38,7 @@ it('should updated from an object', function() {
 
 it('should not be able to delete a property', function() {
   var a = new Yamb();
-  a.meta = 'Title';
+  a.meta = {title: 'Title'};
 
   delete a.meta.title;
   a.meta.title.should.equal('Title');
