@@ -10,7 +10,20 @@ describe('Yamb', function() {
   });
 
   describe('properties', function() {
-    var props = ['id', 'uri', 'title', 'preview', 'text', 'author', 'related', 'tags', 'stats', 'created', 'active'];
+    var props = [
+      'id',
+      'uri',
+      'title',
+      'preview',
+      'text',
+      'author',
+      'tags',
+      'related',
+      'meta',
+      'stats',
+      'created',
+      'active'
+    ];
 
     for (var i=0, length=props.length; i<length; i++) {
       describe(props[i], function() {
