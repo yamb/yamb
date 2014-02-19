@@ -1,4 +1,5 @@
 var poor = utils.unexpected({bool: true});
+poor.push([[1, 2], [3, 4], [5, 6]]);
 
 function assert(a, arr) {
   a.related.should.be.an.instanceof(Array);
@@ -10,9 +11,17 @@ it('should works', function() {
   var b = new Yamb();
   var c = new Yamb();
 
-  c.related = [b, ' ', a];
+  c.related = [b, ' ', a, 200];
 
-  assert(c, [100]);
+  assert(c, [100, 200]);
+});
+
+it('should work with yamb', function() {
+  var a = new Yamb(data.update);
+  var b = new Yamb();
+
+  b.related = a;
+  assert(b, [100]);
 });
 
 it('should work with number', function() {
