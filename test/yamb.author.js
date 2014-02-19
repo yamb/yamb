@@ -1,4 +1,5 @@
 var poor = utils.unexpected({bool: true, arr: true, num: true});
+var defaults = schema.data.author;
 
 function assert(a, name, email, url) {
   a.author.should.be.an.instanceof(Object);
@@ -10,6 +11,16 @@ function assert(a, name, email, url) {
 }
 
 it('should works', function() {
+  var a = new Yamb();
+
+  a.author.name = 'Alexey ';
+  a.author.email = '  alexey@simonenko.su';
+  a.author.url = '  \nhttp://simonenko.su\n  ';
+
+  assert(a, 'Alexey', 'alexey@simonenko.su', 'http://simonenko.su');
+});
+
+it('should updated from a string', function() {
   var a = new Yamb();
 
   a.author = 'Alexey';
@@ -54,7 +65,7 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({author: poor[i]});
-    assert(a, schema.data.author.name, schema.data.author.email, schema.data.author.url);
+    assert(a, defaults.name, defaults.email, defaults.url);
   }
 
   a = new Yamb({author: {
@@ -64,7 +75,7 @@ it('should not update with unexpected values from constructor', function() {
     url: 'http://simonenko.su'
   }});
 
-  assert(a, schema.data.author.name, schema.data.author.email, schema.data.author.url);
+  assert(a, defaults.name, defaults.email, defaults.url);
 });
 
 it('should not update with unexpected values from setter', function() {
@@ -74,6 +85,20 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.author = poor[i];
 
-    assert(a, schema.data.author.name, schema.data.author.email, schema.data.author.url);
+    assert(a, defaults.name, defaults.email, defaults.url);
+  }
+});
+
+it('should not set property with unexpected values', function() {
+  var a;
+
+  for (var i=0, length=poor.length; i<length; i++) {
+    a = new Yamb();
+
+    a.author.name = poor[i];
+    a.author.email = poor[i];
+    a.author.url = poor[i];
+
+    assert(a, defaults.name, defaults.email, defaults.url);
   }
 });

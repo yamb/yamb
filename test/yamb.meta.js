@@ -1,4 +1,5 @@
 var poor = utils.unexpected({bool: true, arr: true, num: true, str: true});
+var defaults = schema.data.meta;
 
 function assert(a, title, description, keywords) {
   a.meta.should.be.an.instanceof(Object);
@@ -12,8 +13,11 @@ function assert(a, title, description, keywords) {
 it('should works', function() {
   var a = new Yamb();
 
-  a.meta = {title: 'Title'};
-  assert(a, 'Title', '', '');
+  a.meta.title = '  Title  ';
+  a.meta.description = ' Description text';
+  a.meta.keywords = 'keyword 1, keyword 2 ';
+
+  assert(a, 'Title', 'Description text', 'keyword 1, keyword 2');
 });
 
 it('should updated from an object', function() {
@@ -54,7 +58,7 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({meta: poor[i]});
-    assert(a, schema.data.meta.title, schema.data.meta.description, schema.data.meta.keywords);
+    assert(a, defaults.title, defaults.description, defaults.keywords);
   }
 
   a = new Yamb({meta: {
@@ -64,7 +68,7 @@ it('should not update with unexpected values from constructor', function() {
     keywords: 'keyword 1, keyword 2'
   }});
 
-  assert(a, schema.data.meta.title, schema.data.meta.description, schema.data.meta.keywords);
+  assert(a, defaults.title, defaults.description, defaults.keywords);
 });
 
 it('should not update with unexpected values from setter', function() {
@@ -74,6 +78,24 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.meta = poor[i];
 
-    assert(a, schema.data.meta.title, schema.data.meta.description, schema.data.meta.keywords);
+    assert(a, defaults.title, defaults.description, defaults.keywords);
+  }
+});
+
+it('should not set property with unexpected values', function() {
+  var a;
+
+  for (var i=0, length=poor.length; i<length; i++) {
+    if (typeof poor[i] == 'string') {
+      continue;
+    }
+
+    a = new Yamb();
+
+    a.meta.title = poor[i];
+    a.meta.description = poor[i];
+    a.meta.keywords = poor[i];
+
+    assert(a, defaults.title, defaults.description, defaults.keywords);
   }
 });
