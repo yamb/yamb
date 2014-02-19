@@ -1,26 +1,11 @@
 var poor = utils.unexpected({bool: true, arr: true, num: true, str: true});
 var datetime = '2013-12-17 1:52';
 
-function convert(o) {
-  var date = [
-    o.getFullYear(),
-    o.getMonth(),
-    o.getDate()
-  ];
-
-  var time = [
-    o.getHours(),
-    o.getMinutes()
-  ];
-
-  return date.join('-') + ' ' + time.join(':');
-}
-
 function assert(a, date) {
   a.created.should.be.an.instanceof(Date);
   a.created.toISOString.should.be.type('function');
 
-  convert(a.created).should.equal(convert(date));
+  utils.dateConvert(a.created).should.equal(utils.dateConvert(date));
 }
 
 it('should works', function() {

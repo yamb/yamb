@@ -28,7 +28,7 @@ exports.update = {
   params: 'more parameters',
   tags: ['business'],
   created: '2013-12-23 18:59',
-  active: true,
+  active: false,
   stats: {
     views: 10,
     likes: 5,

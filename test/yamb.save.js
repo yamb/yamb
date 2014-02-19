@@ -40,6 +40,44 @@ it('should update an existing object', function(done) {
   })();
 });
 
+it('should auto create publish property if active', function(done) {
+  co(function *() {
+    var a = new Yamb(data.update);
+
+    a.publish.should.be.false;
+    a.active.should.be.false;
+
+    a.active = true;
+    a = yield a.save();
+
+    a.should.be.ok;
+    a.publish.should.be.an.instanceof(Date);
+    a.publish.toISOString.should.be.type('function');
+    a.active.should.be.true;
+
+    done();
+  })();
+});
+
+it('should not save if nothing to change', function(done) {
+  co(function *() {
+    var a = new Yamb(data.update);
+
+    a.publish.should.be.false;
+    a.active.should.be.false;
+
+    a = yield a.save();
+
+    a.should.be.ok;
+    a.publish.should.be.false;
+    a.active.should.be.false;
+
+    done();
+  })();
+});
+
+it.skip('should check related');
+
 it('should auto create uri from translation service', function(done) {
   co(function *() {
     var a = new Yamb();

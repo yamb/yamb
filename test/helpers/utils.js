@@ -56,3 +56,18 @@ exports.unexpected = function(params) {
 
   return poor;
 };
+
+exports.dateConvert = function(o) {
+  var date = [
+    o.getFullYear(),
+    o.getMonth(),
+    o.getDate()
+  ];
+
+  var time = [
+    o.getHours(),
+    o.getMinutes()
+  ];
+
+  return date.join('-') + ' ' + time.join(':');
+};
