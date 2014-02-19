@@ -20,6 +20,7 @@ describe('Yamb', function() {
       'tags',
       'related',
       'meta',
+      'social',
       'stats',
       'created',
       'active'
