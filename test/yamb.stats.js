@@ -1,4 +1,5 @@
 var poor = utils.unexpected({bool: true, arr: true, num: true, str: true});
+var defaults = schema.data.stats;
 
 function assert(a, views, likes, comments) {
   a.stats.should.be.an.instanceof(Object);
@@ -51,7 +52,7 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({stats: poor[i]});
-    assert(a, schema.data.stats.views, schema.data.stats.likes, schema.data.stats.comments);
+    assert(a, defaults.views, defaults.likes, defaults.comments);
   }
 
   a = new Yamb({stats: {
@@ -60,7 +61,7 @@ it('should not update with unexpected values from constructor', function() {
     likes: '20'
   }});
 
-  assert(a, schema.data.stats.views, schema.data.stats.likes, schema.data.stats.comments);
+  assert(a, defaults.views, defaults.likes, defaults.comments);
 });
 
 it('should not update with unexpected values from setter', function() {
@@ -70,6 +71,24 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.stats = poor[i];
 
-    assert(a, schema.data.stats.views, schema.data.stats.likes, schema.data.stats.comments);
+    assert(a, defaults.views, defaults.likes, defaults.comments);
+  }
+});
+
+it('should not set property with unexpected values', function() {
+  var a;
+
+  for (var i=0, length=poor.length; i<length; i++) {
+    if (typeof poor[i] == 'string' || typeof poor[i] == 'number') {
+      continue;
+    }
+
+    a = new Yamb();
+
+    a.stats.views = poor[i];
+    a.stats.comments = poor[i];
+    a.stats.likes = poor[i];
+
+    assert(a, defaults.views, defaults.likes, defaults.comments);
   }
 });
