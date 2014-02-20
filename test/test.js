@@ -3,7 +3,7 @@ describe('Yamb', function() {
   utils = require('./helpers/utils');
   data = require('./_data/data');
 
-  Yamb = require('./helpers/yamb');
+  Yamb = require('./helpers/yamb')(true);
 
   describe('#constructor()', function() {
     require('./yamb.constructor');

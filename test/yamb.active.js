@@ -1,4 +1,5 @@
 var poor = utils.unexpected({arr: true, num: true, str: true});
+var defaults = schema.data.active;
 
 it('should work with boolean', function() {
   var a = new Yamb();
@@ -25,7 +26,7 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({active: poor[i]});
-    a.active.should.equal(schema.data.active);
+    a.active.should.equal(defaults);
   }
 });
 
@@ -36,6 +37,6 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.active = poor[i];
 
-    a.active.should.equal(schema.data.active);
+    a.active.should.equal(defaults);
   }
 });

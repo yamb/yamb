@@ -1,4 +1,5 @@
 var poor = utils.unexpected({bool: true, arr: true, num: true});
+var defaults = schema.data.text;
 
 it('should works', function() {
   var a = new Yamb();
@@ -32,7 +33,7 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({text: poor[i]});
-    a.text.should.equal(schema.data.text);
+    a.text.should.equal(defaults);
   }
 });
 
@@ -43,6 +44,6 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.text = poor[i];
 
-    a.text.should.equal(schema.data.text);
+    a.text.should.equal(defaults);
   }
 });

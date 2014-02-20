@@ -1,10 +1,10 @@
 describe('EMT typographer', function() {
   var data = require('./_data/data');
-  var Yamb = require('./helpers/yamb');
+  var Yamb = require('./helpers/yamb')(true);
 
   it('should update title', function *() {
     var a = new Yamb();
-    a.update(data.create);
+    a.update(data('easymongo', true));
 
     a.title = '"May the force be with you."';
 
@@ -16,7 +16,7 @@ describe('EMT typographer', function() {
 
   it('should update text and preview', function *() {
     var a = new Yamb();
-    a.update(data.create);
+    a.update(data('easymongo', true));
 
     a.preview = '"The force" - is a magical power that gives people strength.';
     a.text = '"The force" - is a magical power that gives people strength.';

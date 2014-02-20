@@ -20,6 +20,7 @@
     }
   , "devDependencies": {
         "co": "~3.0.4"
+      , "co-easymongo": "~0.2.3"
       , "jshint": "~2.4"
       , "mocha": "~1.17"
       , "should": "~3.1"

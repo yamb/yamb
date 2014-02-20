@@ -2,13 +2,13 @@ var poor = utils.unexpected({bool: true, arr: true, num: true, str: true});
 
 it('should works', function() {
   var a = new Yamb();
-  a.update(data.create);
+  a.update(data('easymongo', true));
 
-  a.uri.should.equal(utils.yambUri(a.created, 'a-panhandlers-guide-to-business-life-love'));
-  a.title.should.equal("Pay People What They're Worth");
+  a.uri.should.equal(utils.yambUri(a.created, 'the-easiest-mongodb-api'));
+  a.title.should.equal('The easiest MongoDB API');
 
   a.tags.should.be.an.instanceof(Array).and.have.length(1);
-  a.tags.should.include('business');
+  a.tags.should.include('mongodb');
 });
 
 it('should not update properties with unexpected values', function() {
@@ -23,7 +23,7 @@ it('should not update properties with unexpected values', function() {
 
 it('should not have properties outside the schema', function() {
   var a = new Yamb();
-  a.update(data.create);
+  a.update(data('unexpected', true));
 
   a.id.should.be.false;
   a.should.not.have.property('video');

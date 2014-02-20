@@ -1,4 +1,6 @@
 var poor = utils.unexpected({bool: true});
+var defaults = schema.data.related;
+
 poor.push([[1, 2], [3, 4], [5, 6]]);
 
 function assert(a, arr) {
@@ -7,21 +9,21 @@ function assert(a, arr) {
 }
 
 it('should works', function() {
-  var a = new Yamb(data.update);
+  var a = new Yamb(data('easymongo'));
   var b = new Yamb();
   var c = new Yamb();
 
   c.related = [b, ' ', a, 200];
 
-  assert(c, [100, 200]);
+  assert(c, ['52fbd292bf40402a959381e3', 200]);
 });
 
 it('should work with yamb', function() {
-  var a = new Yamb(data.update);
+  var a = new Yamb(data('easymongo'));
   var b = new Yamb();
 
   b.related = a;
-  assert(b, [100]);
+  assert(b, ['52fbd292bf40402a959381e3']);
 });
 
 it('should work with number', function() {
@@ -42,7 +44,7 @@ it('should be able to clean', function() {
   a.related = '10';
   a.related = [];
 
-  assert(a, []);
+  assert(a, defaults);
 });
 
 it('should not update with unexpected values from constructor', function() {
@@ -50,7 +52,7 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({related: poor[i]});
-    assert(a, schema.data.related);
+    assert(a, defaults);
   }
 });
 
@@ -61,6 +63,6 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.related = poor[i];
 
-    assert(a, schema.data.related);
+    assert(a, defaults);
   }
 });

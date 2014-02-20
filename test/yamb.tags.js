@@ -1,4 +1,5 @@
 var poor = utils.unexpected({bool: true, num: true});
+var defaults = schema.data.tags;
 
 function assert(a, arr) {
   a.tags.should.be.an.instanceof(Array);
@@ -28,11 +29,11 @@ it('should be able to clean', function() {
 
   a = new Yamb({tags: ['tag 1']});
   a.tags = '';
-  assert(a, []);
+  assert(a, defaults);
 
   a = new Yamb({tags: ['tag 1']});
   a.tags = [];
-  assert(a, []);
+  assert(a, defaults);
 });
 
 it('should not update with unexpected values from constructor', function() {
@@ -40,7 +41,7 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({tags: poor[i]});
-    assert(a, schema.data.tags);
+    assert(a, defaults);
   }
 });
 
@@ -51,6 +52,6 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.tags = poor[i];
 
-    assert(a, schema.data.tags);
+    assert(a, defaults);
   }
 });

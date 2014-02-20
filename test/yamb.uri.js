@@ -1,4 +1,5 @@
 var poor = utils.unexpected({bool: true, arr: true, num: true});
+var defaults = schema.data.uri;
 
 function assert(a, uri) {
   a.uri.should.equal(utils.yambUri(a.created, uri));
@@ -18,7 +19,7 @@ it('should works only for [a-z0-9] string', function() {
   var a = new Yamb();
 
   a.uri = 'Пульс твиттера о веб-разработке';
-  a.uri.should.equal(schema.data.uri);
+  a.uri.should.equal(defaults);
 
   a.uri = 'Нужны ли классы в JavaScript?';
   assert(a, 'javascript');
@@ -29,7 +30,7 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({uri: poor[i]});
-    a.uri.should.equal(schema.data.uri);
+    a.uri.should.equal(defaults);
   }
 });
 
@@ -40,6 +41,6 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.uri = poor[i];
 
-    a.uri.should.equal(schema.data.uri);
+    a.uri.should.equal(defaults);
   }
 });

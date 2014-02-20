@@ -1,6 +1,6 @@
 it('should works', function() {
   var a = new Yamb();
-  a.update(data.create);
+  a.update(data('easymongo', true));
 
   var json = a.json();
   a.json(true).should.not.be.empty;

@@ -1,5 +1,5 @@
 it('should works', function() {
-  var a = new Yamb(data.create);
+  var a = new Yamb(data('easymongo'));
   var json = a.json();
 
   json.id.should.equal(a.id);
@@ -8,7 +8,7 @@ it('should works', function() {
 });
 
 it('should return only updated values', function() {
-  var a = new Yamb(data.create);
+  var a = new Yamb(data('easymongo'));
   a.title = 'New title';
 
   var json = a.json(true);
@@ -18,14 +18,14 @@ it('should return only updated values', function() {
 });
 
 it('should to be empty if nothing to change', function() {
-  var a = new Yamb(data.create);
+  var a = new Yamb(data('easymongo'));
   var json = a.json(true);
 
   json.should.be.empty;
 });
 
 it('should always clone returned object', function() {
-  var a = new Yamb(data.create);
+  var a = new Yamb(data('easymongo'));
   var json = a.json();
 
   json.should.not.equal(a.json());

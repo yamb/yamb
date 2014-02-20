@@ -1,18 +1,11 @@
 var should = require('should');
 
 it('should works', function *() {
-  var a = new Yamb(data.create);
-  var r = yield a.remove();
-
-  r.should.be.true;
-});
-
-it('should remove newly created object', function *() {
   var a = new Yamb();
-  a.update(data.create);
+  a.update(data('easymongo', true));
 
   a = yield a.save();
-  a.should.be.ok;
+  a.id.should.not.false;
 
   var r = yield a.remove();
   r.should.be.true;
