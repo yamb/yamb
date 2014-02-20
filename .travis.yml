@@ -6,3 +6,11 @@ node_js:
 env:
   global:
     secure: ofjLYJe/IFFvK3jV6RskdPWOeR+bZvXb0pk+e/wH3jjnClq6+Fy+5ZUx2z/tsCHYyx8TWaaPTRsTv+akw2DpBL3l/GsmNVAPw/0ULiHzQ/yNwEnMYmaqoPZVE43Svh+AlCN93sWw3W+f1xjVq4ZeTgqjGYM73EwmMTsMzfU7yJA=
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/411851d7e0918efaca18
+    on_success: change
+    on_failure: always
+    on_start: false
