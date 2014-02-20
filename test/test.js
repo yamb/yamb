@@ -49,6 +49,10 @@ describe('Yamb', function() {
       require('./yamb.json');
     });
 
+    describe('#html()', function() {
+      require('./yamb.html');
+    });
+
     describe('#save()', function() {
       require('./yamb.save');
     });
