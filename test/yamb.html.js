@@ -2,7 +2,8 @@ var poor = utils.unexpected({bool: true, arr: true, num: true});
 
 var text = {
   simple: 'Hey **everyone**! Look at http://simonenko.su and let *me* know if you ~~hate~~like it.',
-  code: 'See this javascript code:\n\n```js\nif ("text".trim().length > 0) console.log("ok");\n```'
+  code1: 'See this javascript code:\n\n```\nif ("text".trim().length > 0) console.log("ok");\n```',
+  code2: 'See this javascript code:\n\n```js\nif ("text".trim().length > 0) console.log("ok");\n```'
 };
 
 it('should works', function() {
@@ -13,9 +14,13 @@ it('should works', function() {
 });
 
 it('should works with highlight.js', function() {
+  var html;
   var a = new Yamb();
-  var html = a.html(text.code);
 
+  html = a.html(text.code1);
+  html.should.equal('<p>See this javascript code:</p>\n<pre><code>if (&quot;text&quot;.trim().length &gt; 0) console.log(&quot;ok&quot;);\n</code></pre>');
+
+  html = a.html(text.code2);
   html.should.equal('<p>See this javascript code:</p>\n<pre><code class="lang-js"><span class="hljs-keyword">if</span> (<span class="hljs-string">"text"</span>.trim().length &gt; <span class="hljs-number">0</span>) console.log(<span class="hljs-string">"ok"</span>);\n</code></pre>');
 });
 
