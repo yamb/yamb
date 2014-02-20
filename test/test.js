@@ -41,16 +41,20 @@ describe('Yamb', function() {
       require('./yamb.update');
     });
 
+    describe('#reset()', function() {
+      require('./yamb.reset');
+    });
+
+    describe('#json()', function() {
+      require('./yamb.json');
+    });
+
     describe('#save()', function() {
       require('./yamb.save');
     });
 
     describe('#delete()', function() {
       require('./yamb.delete');
-    });
-
-    describe('#json()', function() {
-      require('./yamb.json');
     });
   });
 });
