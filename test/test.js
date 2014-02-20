@@ -23,6 +23,7 @@ describe('Yamb', function() {
       'social',
       'stats',
       'created',
+      'publish',
       'active'
     ];
 
