@@ -40,7 +40,7 @@ it('should updated from an object', function() {
   assert(a, 'Alexey', 'alexey@simonenko.su', '');
 
   a.author = {
-    name: '',
+    name: ' \n  \n ',
     url: '\n \n http://simonenko.su'
   };
 
@@ -101,4 +101,26 @@ it('should not set property with unexpected values', function() {
 
     assert(a, defaults.name, defaults.email, defaults.url);
   }
+
+  a = new Yamb();
+  a.author = ' \n\n <nobr>  </nobr> ';
+  assert(a, defaults.name, defaults.email, defaults.url);
+
+  a = new Yamb();
+
+  a.author.name = ' \n\n <nobr>  </nobr> ';
+  a.author.email = ' <strong> <em>\n</em> </strong>';
+  a.author.url = ' <a href="http://simonenko.su"> \n </a>\n';
+
+  assert(a, defaults.name, defaults.email, defaults.url);
+
+  a = new Yamb();
+
+  a.author = {
+    name: ' \n\n <nobr>  </nobr> ',
+    email: ' <strong> <em>\n</em> </strong>',
+    url: ' <a href="http://simonenko.su"> \n </a>\n'
+  };
+
+  assert(a, defaults.name, defaults.email, defaults.url);
 });
