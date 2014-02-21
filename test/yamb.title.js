@@ -29,4 +29,9 @@ it('should not update with unexpected values from setter', function() {
 
     a.title.should.equal(defaults);
   }
+
+  a = new Yamb();
+  a.title = ' \n <nobr>  \n  </nobr> ';
+
+  a.title.should.equal(defaults);
 });
