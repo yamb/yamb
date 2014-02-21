@@ -9,6 +9,8 @@ it('should works', function *() {
 
   var r = yield a.remove();
   r.should.be.true;
+
+  a.id.should.false;
 });
 
 it('should return error if object not saved yet', function *() {
