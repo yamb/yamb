@@ -5,7 +5,7 @@ data.easymongo = {
     id: '52fbd292bf40402a959381e3',
     uri: '/2013/12/the-easiest-mongodb-api',
     title: 'The easiest MongoDB API',
-    preview: 'A small tweaks for the [native MongoDB driver](https://github.com/mongodb/node-mongodb-native).',
+    preview: 'A **small** tweaks for the [native MongoDB driver](https://github.com/mongodb/node-mongodb-native).',
     text: "It's like native MongoDB driver but for newbie. In my opinion native driver has many difficulties. And for general purpose no need to be so flexible.\n\n**Benefits:**\n\n* Expected return data\n* Using strings for ObjectID values\n* `Collection` class for all manipulates with collections\n* Additional methods for work with id like `findById`, `removeById`\n* Less callbacks\n\n**Example:**\n\n```js\nvar users = mongo.collection('users');\n\nusers.find(function(err, res) {\n  console.log(res);\n});\n```",
     author: {name: 'Alexey Simonenko', email: 'alexey@simonenko.su', url: 'http://twitter.com/oknenomis'},
     tags: ['mongodb', 'nodejs', 'coffeescript'],
