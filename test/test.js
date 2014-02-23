@@ -1,7 +1,7 @@
 describe('Yamb', function() {
   schema = require('./helpers/schema');
   utils = require('./helpers/utils');
-  data = require('./_data/data');
+  data = require('./data');
 
   Yamb = require('./helpers/yamb')(true);
 
