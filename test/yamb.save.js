@@ -55,8 +55,6 @@ it('should not save if nothing to change', function *() {
   a.active.should.be.true;
 });
 
-it.skip('should check related');
-
 it('should auto create uri from translation service', function *() {
   var a = new Yamb();
   a.update(data('tumblr', true));

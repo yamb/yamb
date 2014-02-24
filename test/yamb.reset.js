@@ -10,5 +10,3 @@ it('should works', function() {
   a.json(true).should.be.empty;
   a.json().should.eql(json);
 });
-
-it.skip('should reset related cache');

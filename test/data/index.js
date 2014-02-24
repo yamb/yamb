@@ -1,3 +1,4 @@
+var clone = require('clone');
 var data = {};
 
 data.easymongo = {
@@ -75,8 +76,8 @@ data.unexpected = {
 
 module.exports = function(name, update) {
   if (update === true) {
-    return data[name].update;
+    return clone(data[name].update);
   } else {
-    return data[name].create;
+    return clone(data[name].create);
   }
 };

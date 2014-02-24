@@ -37,28 +37,20 @@ describe('Yamb', function() {
   describe('methods', function() {
     require('./yamb.methods');
 
-    describe('#update()', function() {
-      require('./yamb.update');
-    });
+    var methods = [
+      'update',
+      'reset',
+      'json',
+      'html',
+      'save',
+      'delete',
+      'similar'
+    ];
 
-    describe('#reset()', function() {
-      require('./yamb.reset');
-    });
-
-    describe('#json()', function() {
-      require('./yamb.json');
-    });
-
-    describe('#html()', function() {
-      require('./yamb.html');
-    });
-
-    describe('#save()', function() {
-      require('./yamb.save');
-    });
-
-    describe('#delete()', function() {
-      require('./yamb.delete');
-    });
+    for (var i=0, length=methods.length; i<length; i++) {
+      describe('#' + methods[i] + '()', function() {
+        require('./yamb.' + methods[i]);
+      });
+    }
   });
 });
