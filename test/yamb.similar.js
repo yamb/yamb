@@ -1,14 +1,14 @@
 it('should works', function *() {
   var a, b, c, ab, r;
 
-  a = new Yamb();
-  a = yield a.update(data('easymongo', true)).save();
+  a = new Yamb(data('twtcst', true));
+  a = yield a.update({uri: a.title}).save();
 
-  b = new Yamb();
-  b = yield b.update(data('easymongo', true)).save();
+  b = new Yamb(data('twtcst', true));
+  b = yield b.update({uri: b.title}).save();
 
-  c = new Yamb();
-  c.update(data('easymongo', true));
+  c = new Yamb(data('twtcst', true));
+  c.uri = c.title;
   c.related = [a, b, c];
 
   c = yield c.save();

@@ -1,6 +1,6 @@
 it('should create a new object', function *() {
-  var a = new Yamb();
-  a.update(data('easymongo', true));
+  var a = new Yamb(data('twtcst', true));
+  a.update({uri: a.title});
 
   a = yield a.save();
 
@@ -31,9 +31,9 @@ it('should update an existing object', function *() {
 });
 
 it('should auto create publish property if active', function *() {
-  var a = new Yamb();
+  var a = new Yamb(data('twtcst', true));
 
-  a.update(data('tumblr', true));
+  a.uri = a.title;
   a = yield a.save();
 
   a.publish.should.be.false;
@@ -56,8 +56,7 @@ it('should not save if nothing to change', function *() {
 });
 
 it('should auto create uri from translation service', function *() {
-  var a = new Yamb();
-  a.update(data('tumblr', true));
+  var a = new Yamb(data('twtcst', true));
 
   a.title = 'Заголовок 2014';
   a.uri.should.be.false;

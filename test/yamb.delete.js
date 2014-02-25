@@ -1,8 +1,8 @@
 var should = require('should');
 
 it('should works', function *() {
-  var a = new Yamb();
-  a.update(data('easymongo', true));
+  var a = new Yamb(data('twtcst', true));
+  a.update({uri: a.title});
 
   a = yield a.save();
   a.id.should.not.false;

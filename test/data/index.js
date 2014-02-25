@@ -49,6 +49,19 @@ data.tumblr = {
   }
 };
 
+data.twtcst = {
+  create: {},
+
+  update: {
+    title: 'The easiest MongoDB API',
+    preview: 'A **small** tweaks for the native MongoDB driver.',
+    text: "It's like native MongoDB driver but for newbie. In my opinion native driver has many difficulties.",
+    author: {name: 'Alexey Simonenko', email: 'alexey@simonenko.su', url: 'http://twitter.com/oknenomis'},
+    tags: ['mongodb'],
+    stats: {views: 5, likes: 0, comments: 2}
+  }
+};
+
 data.unexpected = {
   create: {
     _id: 100,
