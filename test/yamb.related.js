@@ -47,6 +47,19 @@ it('should be able to clean', function() {
   assert(a, defaults);
 });
 
+it('should not include itself', function *() {
+  var a = new Yamb(data('twtcst', true));
+  a = yield a.save();
+
+  var b = new Yamb(data('twtcst', true));
+  b = yield b.save();
+
+  b.related = [100, b, a, ' '];
+
+  b = yield b.save();
+  b.related.should.eql([a.id]);
+});
+
 it('should not update with unexpected values from constructor', function() {
   var a;
 
