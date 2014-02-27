@@ -1,4 +1,4 @@
-describe('Yamb', function() {
+describe('Yamb class', function() {
   schema = require('./helpers/schema');
   utils = require('./helpers/utils');
   data = require('./data');
@@ -6,7 +6,7 @@ describe('Yamb', function() {
   Yamb = require('./helpers/yamb')(true);
 
   describe('#constructor()', function() {
-    require('./yamb.constructor');
+    require('./yamb-class/yamb.constructor');
   });
 
   describe('properties', function() {
@@ -29,13 +29,13 @@ describe('Yamb', function() {
 
     for (var i=0, length=props.length; i<length; i++) {
       describe(props[i], function() {
-        require('./yamb.' + props[i]);
+        require('./yamb-class/props/yamb.' + props[i]);
       });
     }
   });
 
   describe('methods', function() {
-    require('./yamb.methods');
+    require('./yamb-class/yamb.methods');
 
     var methods = [
       'update',
@@ -49,7 +49,7 @@ describe('Yamb', function() {
 
     for (var i=0, length=methods.length; i<length; i++) {
       describe('#' + methods[i] + '()', function() {
-        require('./yamb.' + methods[i]);
+        require('./yamb-class/methods/yamb.' + methods[i]);
       });
     }
   });
