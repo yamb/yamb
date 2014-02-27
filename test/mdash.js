@@ -1,6 +1,6 @@
 describe('EMT typographer', function() {
   var data = require('./data');
-  var Yamb = require('./helpers/yamb')(true);
+  var Yamb = require('./helpers/yamb')(false, true);
 
   it('should update title', function *() {
     var a = new Yamb();
