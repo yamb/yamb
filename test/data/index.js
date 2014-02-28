@@ -88,9 +88,13 @@ data.unexpected = {
 }
 
 module.exports = function(name, update) {
+  var params;
+
   if (update === true) {
-    return clone(data[name].update);
+    params = clone(data[name].update);
   } else {
-    return clone(data[name].create);
+    params = clone(data[name].create);
   }
+
+  return params;
 };
