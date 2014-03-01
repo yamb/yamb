@@ -42,9 +42,11 @@ describe('Yamb class', function() {
       'reset',
       'json',
       'html',
-      'save',
       'delete',
-      'similar'
+      'next',
+      'prev',
+      'similar',
+      'save'
     ];
 
     for (var i=0, length=methods.length; i<length; i++) {
