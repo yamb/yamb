@@ -1,4 +1,4 @@
-var methods = ['html', 'json', 'remove', 'save', 'similar', 'update'];
+var methods = ['html', 'json', 'remove', 'save', 'reset', 'next', 'prev', 'similar', 'update'];
 
 it('should not be overridable', function() {
   var a = new Yamb();

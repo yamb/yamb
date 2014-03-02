@@ -1,3 +1,7 @@
+before(function *() {
+  var r = yield yamb.remove();
+});
+
 it('should works', function *() {
   var a, b, c, ab, r;
 

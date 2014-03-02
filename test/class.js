@@ -3,6 +3,7 @@ describe('Yamb class', function() {
   utils = require('./helpers/utils');
   data = require('./data');
 
+  yamb = require('./helpers/yamb')(true, true);
   Yamb = require('./helpers/yamb')(false, true);
 
   describe('#constructor()', function() {
@@ -42,11 +43,11 @@ describe('Yamb class', function() {
       'reset',
       'json',
       'html',
+      'save',
       'delete',
       'next',
       'prev',
-      'similar',
-      'save'
+      'similar'
     ];
 
     for (var i=0, length=methods.length; i<length; i++) {

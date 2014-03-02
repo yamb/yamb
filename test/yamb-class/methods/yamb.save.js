@@ -1,3 +1,7 @@
+beforeEach(function *() {
+  var r = yield yamb.remove();
+});
+
 it('should create a new object', function *() {
   var a = new Yamb(data('twtcst', true));
   a.update({uri: a.title});

@@ -7,7 +7,7 @@ it('should works', function() {
   html.should.equal('<p>A <strong>small</strong> tweaks for the <a href="https://github.com/mongodb/node-mongodb-native">native MongoDB driver</a>.</p>');
 });
 
-it('should works with highlight.js', function() {
+it('should work with highlight.js', function() {
   var html;
   var a = new Yamb();
 
