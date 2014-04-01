@@ -12,19 +12,19 @@
       "node": ">=0.11"
     }
   , "dependencies": {
-        "clone": "0.1.x"
-      , "marked": "~0.3.1"
+        "clone": "~0.1.11"
+      , "marked": "~0.3.2"
       , "mdash": "~0.1.1"
       , "highlight.js": "8.0.x"
-      , "yandex-translate": "1.0.x"
+      , "yandex-translate": "~1.0.1"
     }
   , "devDependencies": {
-        "co": "~3.0.4"
+        "co": "~3.0.5"
       , "co-easymongo": "~0.2.3"
       , "jshint": "~2.4"
-      , "mocha": "~1.17"
-      , "should": "~3.1"
-      , "coveralls": "~2.8"
+      , "mocha": "~1.18"
+      , "should": "~3.2"
+      , "coveralls": "~2.10"
       , "istanbul": "gotwarlost/istanbul#harmony"
     }
   , "scripts": {
