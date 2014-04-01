@@ -1,6 +1,6 @@
 # Yamb
 
-[![NPM version](https://badge.fury.io/js/yamb.png)](http://badge.fury.io/js/yamb) [![Build Status](https://travis-ci.org/yamb/yamb.png?branch=master)](https://travis-ci.org/yamb/yamb) [![Coverage Status](https://coveralls.io/repos/yamb/yamb/badge.png)](https://coveralls.io/r/yamb/yamb) [![Code Climate](https://codeclimate.com/github/yamb/yamb.png)](https://codeclimate.com/github/yamb/yamb) [![Dependency Status](https://david-dm.org/yamb/yamb.png)](https://david-dm.org/yamb/yamb) [![devDependency Status](https://david-dm.org/yamb/yamb/dev-status.png)](https://david-dm.org/yamb/yamb#info=devDependencies)
+[![NPM version](https://badge.fury.io/js/yamb.svg)](http://badge.fury.io/js/yamb) [![Build Status](https://travis-ci.org/yamb/yamb.svg?branch=master)](https://travis-ci.org/yamb/yamb) [![Coverage Status](https://coveralls.io/repos/yamb/yamb/badge.png)](https://coveralls.io/r/yamb/yamb) [![Code Climate](https://codeclimate.com/github/yamb/yamb.png)](https://codeclimate.com/github/yamb/yamb) [![Dependency Status](https://david-dm.org/yamb/yamb.svg?theme=shields.io)](https://david-dm.org/yamb/yamb) [![devDependency Status](https://david-dm.org/yamb/yamb/dev-status.svg?theme=shields.io)](https://david-dm.org/yamb/yamb#info=devDependencies)
 
 Currently you must use the `--harmony` flag when running node 0.11.x to get access to generators.
 
