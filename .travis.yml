@@ -13,7 +13,7 @@ env:
 notifications:
   webhooks:
     urls:
-      - https://webhooks.gitter.im/e/411851d7e0918efaca18
+      - https://webhooks.gitter.im/e/6f81931d2ca2fde2e1a8
     on_success: change
     on_failure: always
     on_start: false
