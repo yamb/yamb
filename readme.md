@@ -4,9 +4,9 @@
 
 Currently you must use the `--harmony` flag when running node 0.11.x to get access to generators.
 
-You can chat with me. Thanks to [gitter](https://gitter.im/yamb/yamb).
+You can chat with me. Thanks to [gitter](https://gitter.im/yamb).
 
-[![Gitter chat](https://badges.gitter.im/yamb/yamb.png)](https://gitter.im/yamb/yamb)
+[![Gitter chat](https://badges.gitter.im/yamb.png)](https://gitter.im/yamb)
 
 ## Installation
 
