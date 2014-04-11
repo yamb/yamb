@@ -6,7 +6,7 @@ it('should works', function *() {
   var a, b, c, ab, r;
 
   a = new Yamb(data('twtcst', true));
-  a = yield a.update({uri: a.title}).save();
+  a = yield a.update({uri: a.title, active: true}).save();
 
   b = new Yamb(data('twtcst', true));
   b = yield b.update({uri: b.title}).save();
@@ -18,13 +18,16 @@ it('should works', function *() {
   c = yield c.save();
   c.related.should.eql([a.id, b.id]);
 
-  ab = yield c.similar();
+  ab = yield c.similar(true);
   ab.should.be.an.instanceof(Array).and.have.length(2);
   ab[0].constructor.name.should.equal('Yamb');
   ab[1].constructor.name.should.equal('Yamb');
 
-  ab = yield c.similar();
+  ab = yield c.similar(true);
   ab.should.be.an.instanceof(Array).and.have.length(2);
+
+  ab = yield c.similar();
+  ab.should.be.an.instanceof(Array).and.have.length(1);
 
   r = yield a.remove();
   r.should.be.true;
@@ -34,16 +37,22 @@ it('should works', function *() {
   c = yield c.save();
   c.related.should.eql([b.id]);
 
+  ab = yield c.similar(true);
+  ab.should.be.an.instanceof(Array).and.have.length(1);
+
+  ab = yield c.similar();
+  ab.should.be.an.instanceof(Array).and.have.length(0);
+
   r = yield b.remove();
   r.should.be.true;
 
   c.reset();
 
-  ab = yield c.similar();
+  ab = yield c.similar(true);
   ab.should.be.an.instanceof(Array).and.have.length(0);
 
   c = yield c.save();
 
-  ab = yield c.similar();
+  ab = yield c.similar(true);
   ab.should.be.an.instanceof(Array).and.have.length(0);
 });

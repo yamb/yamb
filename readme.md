@@ -63,7 +63,7 @@ co(function *() {
 * `save()` — save all data to storage.
 * `remove()` — remove from storage.
 * `reset()` — reset all changes.
-* `similar()` — returns an array of similar Yamb's.
+* `similar([with_inactive])` — returns an array of similar Yamb's.
 * `next([with_inactive])` — returns next Yamb, if not found returns false.
 * `prev([with_inactive])` — returns previous Yamb, if not found returns false.
 * `html(text)` — convert markdown text to html.
