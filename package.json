@@ -14,16 +14,16 @@
   , "dependencies": {
         "clone": "~0.1.11"
       , "marked": "~0.3.2"
-      , "mdash": "~0.1.1"
+      , "mdash": "~0.1.2"
       , "highlight.js": "8.0.x"
       , "yandex-translate": "~1.0.1"
     }
   , "devDependencies": {
         "co": "~3.0.5"
       , "co-easymongo": "~0.2.3"
-      , "jshint": "~2.4"
+      , "jshint": "~2.5"
       , "mocha": "~1.18"
-      , "should": "~3.2"
+      , "should": "~3.3"
       , "coveralls": "~2.10"
       , "istanbul": "gotwarlost/istanbul#harmony"
     }
