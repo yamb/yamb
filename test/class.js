@@ -17,6 +17,7 @@ describe('Yamb class', function() {
       'title',
       'preview',
       'text',
+      'cover',
       'author',
       'tags',
       'related',
