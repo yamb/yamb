@@ -4,6 +4,7 @@
   "title": "",
   "preview": "",
   "text": "",
+  "cover": "",
 
   "author": {
     "name": "",
@@ -23,8 +24,7 @@
   "social": {
     "title": "",
     "description": "",
-    "image": "",
-    "cover": ""
+    "image": ""
   },
 
   "stats": {

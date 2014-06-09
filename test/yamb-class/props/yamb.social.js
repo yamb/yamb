@@ -1,14 +1,13 @@
 var poor = utils.unexpected({bool: true, arr: true, num: true, str: true});
 var defaults = schema.data.social;
 
-function assert(a, title, description, image, cover) {
+function assert(a, title, description, image) {
   a.social.should.be.an.instanceof(Object);
-  a.social.should.have.properties(['title', 'description', 'image', 'cover']);
+  a.social.should.have.properties(['title', 'description', 'image']);
 
   a.social.title.should.equal(title);
   a.social.description.should.equal(description);
   a.social.image.should.equal(image);
-  a.social.cover.should.equal(cover);
 }
 
 it('should works', function() {
@@ -17,16 +16,15 @@ it('should works', function() {
   a.social.title = '  Social title  ';
   a.social.description = ' \n Description text  ';
   a.social.image = 'cover.png ';
-  a.social.cover = ' image.png';
 
-  assert(a, 'Social title', 'Description text', 'cover.png', 'image.png');
+  assert(a, 'Social title', 'Description text', 'cover.png');
 });
 
 it('should works', function() {
   var a = new Yamb();
 
   a.social = {title: 'Social title'};
-  assert(a, 'Social title', '', '', '');
+  assert(a, 'Social title', '', '');
 });
 
 it('should updated from an object', function() {
@@ -34,19 +32,18 @@ it('should updated from an object', function() {
 
   a.social = {
     title: 'Social title ',
-    image: 'cover.png',
+    image: '\n \n cover.png',
     description: ' \n Description text  ',
     social: 'buttons'
   };
 
-  assert(a, 'Social title', 'Description text', 'cover.png', '');
+  assert(a, 'Social title', 'Description text', 'cover.png');
 
   a.social = {
-    title: '',
-    cover: '\n \n cover.png'
+    title: ''
   };
 
-  assert(a, '', 'Description text', 'cover.png', 'cover.png');
+  assert(a, '', 'Description text', 'cover.png');
 });
 
 it('should not be able to delete a property', function() {
@@ -67,18 +64,17 @@ it('should not update with unexpected values from constructor', function() {
 
   for (var i=0, length=poor.length; i<length; i++) {
     a = new Yamb({social: poor[i]});
-    assert(a, defaults.title, defaults.description, defaults.image, defaults.cover);
+    assert(a, defaults.title, defaults.description, defaults.image);
   }
 
   a = new Yamb({social: {
     title: 'Title',
     image: 'cover.png',
     description: 'Description text',
-    url: 'http://simonenko.su',
-    cover: 'image.png'
+    url: 'http://simonenko.su'
   }});
 
-  assert(a, defaults.title, defaults.description, defaults.image, defaults.cover);
+  assert(a, defaults.title, defaults.description, defaults.image);
 });
 
 it('should not update with unexpected values from setter', function() {
@@ -88,7 +84,7 @@ it('should not update with unexpected values from setter', function() {
     a = new Yamb();
     a.social = poor[i];
 
-    assert(a, defaults.title, defaults.description, defaults.image, defaults.cover);
+    assert(a, defaults.title, defaults.description, defaults.image);
   }
 });
 
@@ -105,8 +101,7 @@ it('should not set property with unexpected values', function() {
     a.social.title = poor[i];
     a.social.description = poor[i];
     a.social.image = poor[i];
-    a.social.cover = poor[i];
 
-    assert(a, defaults.title, defaults.description, defaults.image, defaults.cover);
+    assert(a, defaults.title, defaults.description, defaults.image);
   }
 });
