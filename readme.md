@@ -69,6 +69,25 @@ co(function *() {
 * `html(text)` — convert markdown text to html.
 * `json([newer=false])` — returns all properties in json format.
 
+### Properties
+
+* uri — _string_
+* title – _string_
+* preview – _markdown text_
+* text – _markdown text_
+* cover – _string_
+* author – _object_
+* tags – _array_
+* related – _array_
+* meta – _object_
+* social – _object_
+* stats – _object_
+* created – _date_
+* publish – _date_
+* active – _boolean_
+
+For more info about properties look to [default schema file](https://github.com/yamb/yamb/blob/master/lib/yamb/schema.json).
+
 ## Author
 
 * [Alexey Simonenko](mailto:alexey@simonenko.su), [simonenko.su](http://simonenko.su)
