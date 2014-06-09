@@ -8,7 +8,7 @@ it('should works', function() {
   a.title.should.equal('The easiest MongoDB API');
 
   a.tags.should.be.an.instanceof(Array).and.have.length(1);
-  a.tags.should.include('mongodb');
+  a.tags.should.containEql('mongodb');
 });
 
 it('should not update properties with unexpected values', function() {
