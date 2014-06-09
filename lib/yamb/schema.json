@@ -1,0 +1,39 @@
+{
+  "uri": false,
+
+  "title": "",
+  "preview": "",
+  "text": "",
+
+  "author": {
+    "name": "",
+    "email": "",
+    "url": ""
+  },
+
+  "tags": [],
+  "related": [],
+
+  "meta": {
+    "title": "",
+    "description": "",
+    "keywords": ""
+  },
+
+  "social": {
+    "title": "",
+    "description": "",
+    "image": "",
+    "cover": ""
+  },
+
+  "stats": {
+    "views": 0,
+    "likes": 0,
+    "comments": 0
+  },
+
+  "created": null,
+  "publish": null,
+  "active": false
+}
