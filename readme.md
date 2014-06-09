@@ -63,11 +63,11 @@ co(function *() {
 * `save()` — save all data to storage.
 * `remove()` — remove from storage.
 * `reset()` — reset all changes.
-* `similar([with_inactive])` — returns an array of similar Yamb's.
-* `next([with_inactive])` — returns next Yamb, if not found returns false.
-* `prev([with_inactive])` — returns previous Yamb, if not found returns false.
+* `similar([all=false])` — returns an array of similar Yamb's.
+* `next([all=false])` — returns next Yamb, if not found returns false.
+* `prev([all=false])` — returns previous Yamb, if not found returns false.
 * `html(text)` — convert markdown text to html.
-* `json([only_updated])` — returns all properties in json format.
+* `json([newer=false])` — returns all properties in json format.
 
 ## Author
 
