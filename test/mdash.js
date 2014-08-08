@@ -24,7 +24,7 @@ describe('EMT typographer', function() {
     a = yield a.save();
 
     a.should.be.ok;
-    a.preview.should.equal('«The force» — is a magical power that gives people strength.');
-    a.text.should.equal('«The force» — is a magical power that gives people strength.');
+    a.preview.should.equal('<span style="margin-left:-0.44em;">«</span>The force» — is a magical power that gives people strength.');
+    a.text.should.equal('<span style="margin-left:-0.44em;">«</span>The force» — is a magical power that gives people strength.');
   });
 });
