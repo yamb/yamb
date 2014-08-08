@@ -19,8 +19,8 @@
       , "yandex-translate": "~1.0.1"
     }
   , "devDependencies": {
-        "co": "~3.0.6"
-      , "co-easymongo": "~0.2.5"
+        "co": "~3.1.0"
+      , "co-easymongo": "~0.2.6"
       , "jshint": "~2.5"
       , "mocha": "~1.21"
       , "should": "~4.0.4"
