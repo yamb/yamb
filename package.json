@@ -12,7 +12,7 @@
       "node": ">=0.11"
     }
   , "dependencies": {
-        "clone": "~0.1.16"
+        "clone": "~0.1.17"
       , "marked": "~0.3.2"
       , "mdash": "~0.1.2"
       , "highlight.js": "8.1.x"
@@ -22,9 +22,9 @@
         "co": "~3.0.6"
       , "co-easymongo": "~0.2.5"
       , "jshint": "~2.5"
-      , "mocha": "~1.20"
+      , "mocha": "~1.21"
       , "should": "~4.0.4"
-      , "coveralls": "~2.10"
+      , "coveralls": "~2.11"
       , "istanbul": "gotwarlost/istanbul#harmony"
     }
   , "scripts": {
