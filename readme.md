@@ -1,6 +1,11 @@
 # Yamb
 
-[![NPM version](https://badge.fury.io/js/yamb.svg)](http://badge.fury.io/js/yamb) [![Build Status](https://travis-ci.org/yamb/yamb.svg?branch=master)](https://travis-ci.org/yamb/yamb) [![Coverage Status](https://img.shields.io/coveralls/yamb/yamb.svg)](https://coveralls.io/r/yamb/yamb?branch=master) [![Code Climate](https://codeclimate.com/github/yamb/yamb.png)](https://codeclimate.com/github/yamb/yamb) [![Dependency Status](https://david-dm.org/yamb/yamb.svg?theme=shields.io)](https://david-dm.org/yamb/yamb) [![devDependency Status](https://david-dm.org/yamb/yamb/dev-status.svg?theme=shields.io)](https://david-dm.org/yamb/yamb#info=devDependencies)
+[![NPM version][npm-image]][npm-url]
+[![Build status][travis-image]][travis-url]
+[![Test coverage][coveralls-image]][coveralls-url]
+[![Code climate][climate-image]][climate-url]
+[![Dependency status][dependency-image]][dependency-url]
+[![devDependency status][devdependency-image]][devdependency-url]
 
 Currently you must use the `--harmony` flag when running node 0.11.x to get access to generators.
 
@@ -90,10 +95,21 @@ For more info about properties look to [default schema file](https://github.com/
 
 ## Author
 
-* [Alexey Simonenko](mailto:alexey@simonenko.su), [simonenko.su](http://simonenko.su)
+  - [Alexey Simonenko](https://github.com/meritt)
 
 ## License
 
 The MIT License, see the included `license.md` file.
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/yamb/yamb/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[npm-image]: https://img.shields.io/npm/v/yamb.svg?style=flat
+[npm-url]: https://npmjs.org/package/yamb
+[travis-image]: https://img.shields.io/travis/yamb/yamb.svg?style=flat
+[travis-url]: https://travis-ci.org/yamb/yamb
+[coveralls-image]: https://img.shields.io/coveralls/yamb/yamb.svg?style=flat
+[coveralls-url]: https://coveralls.io/r/yamb/yamb?branch=master
+[climate-image]: https://img.shields.io/codeclimate/github/yamb/yamb.svg?style=flat
+[climate-url]: https://codeclimate.com/github/yamb/yamb
+[dependency-image]: https://img.shields.io/david/yamb/yamb.svg?style=flat
+[dependency-url]: https://david-dm.org/yamb/yamb
+[devdependency-image]: https://img.shields.io/david/dev/yamb/yamb.svg?style=flat
+[devdependency-url]: https://david-dm.org/yamb/yamb#info=devDependencies
