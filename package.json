@@ -31,6 +31,7 @@
     "./errors": "./src/errors/index.js",
     "./internal": "./src/internal/index.js",
     "./schemas": "./src/schemas/zod.js",
+    "./transform": "./src/transform.js",
     "./async-iterator": "./src/async-iterator/index.js",
     "./package.json": "./package.json",
     "./url": "./src/url.js"
