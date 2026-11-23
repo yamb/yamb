@@ -270,7 +270,7 @@ test('remove then save is ordered; removing an unsaved Post has no persistent ef
   assert.equal(fresh.title, 'Later');
 });
 
-test('abort during URI lookup prevents sending; abort after sending cannot undo confirmation', async (t) => {
+test('abort during URI lookup prevents sending and a committed write survives abort', async (t) => {
   const blog = await setup(t);
   const post = blog.build({ title: 'A' });
   const controller = new AbortController();
@@ -285,12 +285,21 @@ test('abort during URI lookup prevents sending; abort after sending cannot undo 
   assert.deepEqual(await blog.all({ status: 'draft' }).toArray(), []);
 
   const lateAbort = new AbortController();
-  const write = gateMethod(blog.storage, 'save');
+  const written = Promise.withResolvers();
+  const confirm = Promise.withResolvers();
+  const save = blog.storage.save.bind(blog.storage);
+  blog.storage.save = async (...args) => {
+    const result = await save(...args);
+    written.resolve();
+    await confirm.promise;
+    return result;
+  };
+
   const committed = post.save({ signal: lateAbort.signal });
 
-  await write.entered;
+  await written.promise;
   lateAbort.abort();
-  write.release.resolve();
+  confirm.resolve();
   await committed;
 
   const stored = await blog.find(post.id);

@@ -1,4 +1,5 @@
 import { yamb } from '@yamb/core';
+import { PostNotFoundError, StorageDuplicateError } from '@yamb/core/errors';
 
 export function postData(bytes = 1024, index = 0) {
   const paragraph = `# Yamb baseline
@@ -21,11 +22,12 @@ A post with **Markdown**, a [link](/blog) and \`code\`.
   };
 }
 
-export async function blogWith(rows = [], config = {}) {
+export function storageWith(rows = []) {
   const records = new Map(rows.map((row) => [row.id, structuredClone(row)]));
   const uris = new Map(rows.map((row) => [row.uri, row.id]));
   let sequence = records.size;
-  const storage = {
+
+  return {
     async open() {},
     async close() {},
     async sync() {},
@@ -35,18 +37,41 @@ export async function blogWith(rows = [], config = {}) {
     async fetch(uri) {
       return this.find(uris.get(uri));
     },
-    async save(raw) {
+    async save(raw, { signal } = {}) {
+      signal?.throwIfAborted();
+
+      const previous = records.get(raw.id);
+
+      if (raw.id && !previous) {
+        throw new PostNotFoundError();
+      }
+
+      if (uris.has(raw.uri) && uris.get(raw.uri) !== raw.id) {
+        throw new StorageDuplicateError();
+      }
+
       const id = raw.id ?? `memory-${++sequence}`;
-      records.set(id, structuredClone({ ...raw, id }));
+      const row = structuredClone({ ...raw, id });
+
+      if (previous) {
+        uris.delete(previous.uri);
+      }
+
+      records.set(id, row);
       uris.set(raw.uri, id);
       return { id };
     },
-    async remove(id) {
+    async remove(id, { signal } = {}) {
+      signal?.throwIfAborted();
+
       const row = records.get(id);
-      if (row) {
-        uris.delete(row.uri);
-        records.delete(id);
+
+      if (!row) {
+        throw new PostNotFoundError();
       }
+
+      uris.delete(row.uri);
+      records.delete(id);
     },
     async *entries() {
       for (const { id, uri } of records.values()) {
@@ -77,8 +102,11 @@ export async function blogWith(rows = [], config = {}) {
         .reduce((n) => n + 1, 0);
     }
   };
+}
+
+export async function blogWith(rows = [], config = {}) {
   const blog = yamb({
-    storage,
+    storage: storageWith(rows),
     clock: () => Temporal.Instant.from('2026-11-10T09:00:00Z'),
     ...config
   });
