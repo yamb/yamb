@@ -10,6 +10,7 @@ import has from './methods/has.js';
 import identify from './methods/identify.js';
 import locate from './methods/locate.js';
 import open from './methods/open.js';
+import render from './methods/render.js';
 import sync from './methods/sync.js';
 import uri from './methods/uri.js';
 
@@ -22,6 +23,7 @@ export default [
   all,
   build,
   create,
+  render,
   uri,
   locate,
   identify,

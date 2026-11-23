@@ -104,6 +104,25 @@ test('yamb config rejects unknown `renderer` key (use renderers map)', () => {
   });
 });
 
+test('blog.render() normalizes a non-yamb collection renderer throw to YAMB_RENDERER_FAILED', async () => {
+  const rss = {
+    name: 'rss',
+    version: '0.1.0',
+    collection: () => {
+      throw new Error('boom');
+    }
+  };
+
+  const blog = yamb({ storage: makeStorage(), renderers: { rss }, base: 'https://example.com' });
+  await blog.open();
+
+  try {
+    await assert.rejects(() => blog.render('rss', { posts: [] }), { code: 'YAMB_RENDERER_FAILED' });
+  } finally {
+    await blog.close();
+  }
+});
+
 test('await using calls close', async () => {
   let closed = false;
   const storage = makeStorage();

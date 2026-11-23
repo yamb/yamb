@@ -6,6 +6,7 @@ import prev from './methods/prev.js';
 import publish from './methods/publish.js';
 import related from './methods/related.js';
 import remove from './methods/remove.js';
+import render from './methods/render.js';
 import save from './methods/save.js';
 import schedule from './methods/schedule.js';
 import toJSON from './methods/to-json.js';
@@ -17,6 +18,7 @@ export default [
   archive,
   schedule,
   remove,
+  render,
   url,
   next,
   prev,
