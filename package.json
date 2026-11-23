@@ -29,7 +29,9 @@
     ".": "./src/index.js",
     "./constants": "./src/constants/index.js",
     "./errors": "./src/errors/index.js",
+    "./internal": "./src/internal/index.js",
     "./schemas": "./src/schemas/zod.js",
+    "./async-iterator": "./src/async-iterator/index.js",
     "./package.json": "./package.json",
     "./url": "./src/url.js"
   },
