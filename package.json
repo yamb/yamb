@@ -30,7 +30,8 @@
     "./constants": "./src/constants/index.js",
     "./errors": "./src/errors/index.js",
     "./schemas": "./src/schemas/zod.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./url": "./src/url.js"
   },
   "publishConfig": {
     "access": "public"
