@@ -1,36 +1,68 @@
 {
-    "name": "yamb"
-  , "version": "0.0.12"
-  , "description": "Yamb"
-  , "author": "Alexey Simonenko <alexey@simonenko.su>"
-  , "main": "./lib/index"
-  , "repository": {
-        "type": "git"
-      , "url": "https://github.com/yamb/yamb.git"
+  "name": "@yamb/core",
+  "version": "1.0.0",
+  "description": "Editable posts, lazy collections and extension APIs for Yamb",
+  "keywords": [
+    "blog",
+    "cms",
+    "esm",
+    "markdown",
+    "post",
+    "yamb"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Alexey Simonenko",
+    "email": "alexey@simonenko.dev",
+    "url": "https://simonenko.xyz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yamb/yamb.git"
+  },
+  "files": [
+    "src"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.js",
+    "./constants": "./src/constants/index.js",
+    "./errors": "./src/errors/index.js",
+    "./internal": "./src/internal/index.js",
+    "./schemas": "./src/schemas/zod.js",
+    "./transform": "./src/transform.js",
+    "./async-iterator": "./src/async-iterator/index.js",
+    "./package.json": "./package.json",
+    "./url": "./src/url.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "test": "node scripts/run-tests.mjs",
+    "test:watch": "node --test --watch 'test/**/*.test.js'",
+    "test:perf": "node --expose-gc --test --test-concurrency=1 'test/perf/**/*.test.js'"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "oxfmt": "0.80.0",
+    "oxlint": "1.95.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "26.13.1",
+      "onFail": "download"
     }
-  , "engines": {
-      "node": ">=0.11"
-    }
-  , "dependencies": {
-        "clone": "~0.1.18"
-      , "marked": "~0.3.2"
-      , "mdash": "~0.1.3"
-      , "highlight.js": "8.3.x"
-      , "yandex-translate": "~1.0.1"
-    }
-  , "devDependencies": {
-        "co": "~3.1.0"
-      , "co-easymongo": "~0.2.7"
-      , "jshint": "~2.5"
-      , "mocha": "~2.0"
-      , "should": "~4.1"
-      , "coveralls": "~2.11"
-      , "istanbul": "gotwarlost/istanbul#harmony"
-    }
-  , "scripts": {
-        "posttest": "node --harmony ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R dot && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
-      , "pretest": "jshint lib"
-      , "test": "mocha --harmony --reporter dot"
-    }
-  , "license": "MIT"
+  },
+  "engines": {
+    "node": ">=26.13.0"
+  },
+  "packageManager": "pnpm@12.23.0"
 }

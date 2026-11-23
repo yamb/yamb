@@ -1,115 +1,84 @@
-# Yamb
+# @yamb/core
 
-[![NPM version][npm-image]][npm-url]
-[![Build status][travis-image]][travis-url]
-[![Test coverage][coveralls-image]][coveralls-url]
-[![Code climate][climate-image]][climate-url]
-[![Dependency status][dependency-image]][dependency-url]
-[![devDependency status][devdependency-image]][devdependency-url]
+[![npm version][npm-image]][npm-url] [![Build status][github-actions-image]][github-actions-url] [![Coverage status][coveralls-image]][coveralls-url] [![Dependency status][libraries-image]][libraries-url]
 
-Currently you must use the `--harmony` flag when running node 0.11.x to get access to generators.
+Yamb manages editable posts and lazy collections for websites, scripts and jobs. The application supplies storage and can add content preparation and renderers.
 
-You can chat with me. Thanks to [gitter](https://gitter.im/yamb).
+## Quick start
 
-[![Gitter chat](https://badges.gitter.im/yamb.png)](https://gitter.im/yamb)
-
-## Installation
+Requires Node.js 26.13 or later. Install core and [file storage](https://github.com/yamb/storage-files).
 
 ```bash
-$ npm install yamb
+pnpm add @yamb/core @yamb/storage-files
 ```
 
-## Examples
+Use a trusted directory for `./posts`.
 
 ```js
-var co = require('co');
+import { yamb } from '@yamb/core';
+import { files } from '@yamb/storage-files';
 
-var mongo = require('co-easymongo')({
-  dbname: 'test'
+await using blog = yamb({
+  storage: files({
+    path: './posts'
+  }),
+  base: 'https://example.com/blog',
+  timeZone: 'UTC'
 });
 
-var yamb = require('yamb')({
-  storage: mongo.collection('posts')
+await blog.open();
+
+const post = await blog.create({
+  title: 'Hello',
+  text: 'A first draft.'
 });
 
-co(function *() {
-  var post = yamb.create({
-    title: 'Yamb header',
-    text: 'Yamb markdown **text**'
-  });
+post.title = 'Hello, Yamb';
+post.text = '**Hello**, world.';
+post.tags.push('javascript');
 
-  post = yield post.save();
+await post.save();
+await post.publish();
 
-  console.log(post.json());
-})();
+for await (const article of blog.published.tagged('javascript').recent(10)) {
+  console.log(article.title, article.url().href);
+}
 ```
 
-## API
+## Packages
 
-### Yamb
+| Package | Role |
+| --- | --- |
+| [storage-files](https://github.com/yamb/storage-files) | Markdown files with JSON frontmatter in a local directory |
+| [storage-mongo](https://github.com/yamb/storage-mongo) | MongoDB with prepared collections and indexes |
+| [storage-sqlite](https://github.com/yamb/storage-sqlite) | Node's built-in SQLite with a prepared database |
+| [markdown](https://github.com/yamb/markdown) | Source → editable tokens → HTML → sanitized page/feed projections |
+| [microtypo](https://github.com/yamb/microtypo) | Native MicroTypo adapter between HTML conversion and cleanup |
+| [render-html](https://github.com/yamb/render-html) | HTML view objects for individual posts |
+| [render-json](https://github.com/yamb/render-json) | Post/collection JSON views and JSON Feed 1.1 |
+| [render-xml](https://github.com/yamb/render-xml) | RSS 2.0 and Atom 1.0 feeds |
 
-### Options
+## Reference
 
-* `storage` (object) — mongodb driver, for example [co-easymongo](https://github.com/meritt/co-easymongo) or any related.
-* `yapi` (string) — api key for [yandex translate service](http://api.yandex.ru/translate/) (optional).
-
-### Methods
-
-* `create([data])` — returns a new instance of the [Yamb class](#yamb-class).
-* `fetch([params][, options])` — find document via `params` and return [Yamb instance](#yamb-class).
-* `fetchAll([params][, options])` — find documents via `params` and return array of [Yamb instance](#yamb-class).
-* `remove([params])` — remove documents.
-
-### Yamb class
-
-### Methods
-
-* `update(params)` — update all the properties from `params`.
-* `save()` — save all data to storage.
-* `remove()` — remove from storage.
-* `reset()` — reset all changes.
-* `similar([all=false])` — returns an array of similar Yamb's.
-* `next([all=false])` — returns next Yamb, if not found returns false.
-* `prev([all=false])` — returns previous Yamb, if not found returns false.
-* `html(text)` — convert markdown text to html.
-* `json([newer=false])` — returns all properties in json format.
-
-### Properties
-
-* `uri` — _string_
-* `title` – _string_
-* `preview` – _markdown text_
-* `text` – _markdown text_
-* `cover` – _string_
-* `author` – _object_
-* `tags` – _array_
-* `related` – _array_
-* `meta` – _object_
-* `social` – _object_
-* `stats` – _object_
-* `created` – _date_
-* `publish` – _date_
-* `active` – _boolean_
-
-For more info about properties look to [default schema file](https://github.com/yamb/yamb/blob/master/lib/yamb/schema.json).
+- [Configuration](api/readme.md#configuration), [posts](api/readme.md#posts), [cover](api/readme.md#cover) and [collections and queries](api/readme.md#collections)
+- [Storage](api/readme.md#storage) and [renderer](api/readme.md#renderers) extension APIs
+- [Content preparation](api/readme.md#transformations)
+- [Exports and errors](api/readme.md#exports-and-errors)
+- [Architecture](docs/architecture.md)
 
 ## Author
 
-  - [Alexey Simonenko](https://github.com/meritt)
+[Alexey Simonenko](https://simonenko.xyz)
 
 ## License
 
-The MIT License, see the included `license.md` file.
+MIT. See `LICENSE`.
 
-[npm-image]: https://img.shields.io/npm/v/yamb.svg?style=flat
-[npm-url]: https://npmjs.org/package/yamb
-[travis-image]: https://img.shields.io/travis/yamb/yamb.svg?style=flat
-[travis-url]: https://travis-ci.org/yamb/yamb
-[coveralls-image]: https://img.shields.io/coveralls/yamb/yamb.svg?style=flat
-[coveralls-url]: https://coveralls.io/r/yamb/yamb?branch=master
-[climate-image]: https://img.shields.io/codeclimate/github/yamb/yamb.svg?style=flat
-[climate-url]: https://codeclimate.com/github/yamb/yamb
-[dependency-image]: https://img.shields.io/david/yamb/yamb.svg?style=flat
-[dependency-url]: https://david-dm.org/yamb/yamb
-[devdependency-image]: https://img.shields.io/david/dev/yamb/yamb.svg?style=flat
-[devdependency-url]: https://david-dm.org/yamb/yamb#info=devDependencies
+[npm-image]: https://img.shields.io/npm/v/@yamb/core?style=flat
+[npm-url]: https://www.npmjs.com/package/@yamb/core
+[github-actions-image]: https://github.com/yamb/yamb/actions/workflows/ci.yml/badge.svg
+[github-actions-url]: https://github.com/yamb/yamb/actions/workflows/ci.yml
+[coveralls-image]: https://coveralls.io/repos/github/yamb/yamb/badge.svg
+[coveralls-url]: https://coveralls.io/github/yamb/yamb
+[libraries-image]: https://img.shields.io/librariesio/release/npm/%40yamb%2Fcore?style=flat
+[libraries-url]: https://libraries.io/npm/%40yamb%2Fcore
