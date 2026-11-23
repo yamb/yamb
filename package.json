@@ -44,7 +44,8 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "test": "node scripts/run-tests.mjs",
-    "test:watch": "node --test --watch 'test/**/*.test.js'"
+    "test:watch": "node --test --watch 'test/**/*.test.js'",
+    "test:perf": "node --expose-gc --test --test-concurrency=1 'test/perf/**/*.test.js'"
   },
   "dependencies": {
     "zod": "^4.6.7"
