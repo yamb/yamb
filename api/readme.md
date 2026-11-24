@@ -183,7 +183,7 @@ URI ties follow the same order direction; missing dates sort last descending and
 
 ## Storage
 
-Adapters import errors from `@yamb/core/errors` and optional schemas/`encodeInstant` from `@yamb/core/schemas`. Every method below is required.
+Adapters import errors from `yamb/errors` and optional schemas/`encodeInstant` from `yamb/schemas`. Every method below is required.
 
 | Method | Input/result |
 | --- | --- |
@@ -228,10 +228,10 @@ Use `post.render(format)` to capture a live Post or `blog.render(format, { post:
 
 ### Transformations
 
-`transform(value, stages, ctx = {})` and `prepare(source, stages, ctx = {})` are exported from `@yamb/core/transform`. A stage is `{ name, version, transform(value, ctx) }`. The executor awaits each stage in order and passes its result to the next stage. Value types and extra context belong to the application.
+`transform(value, stages, ctx = {})` and `prepare(source, stages, ctx = {})` are exported from `yamb/transform`. A stage is `{ name, version, transform(value, ctx) }`. The executor awaits each stage in order and passes its result to the next stage. Value types and extra context belong to the application.
 
 ```js
-import { transform } from '@yamb/core/transform';
+import { transform } from 'yamb/transform';
 
 const upper = {
   name: 'upper',
@@ -249,9 +249,9 @@ Cancellation is checked before stages and after awaits. Stage failure becomes `T
 Standard content preparation uses a full-post pipeline:
 
 ```js
-import { prepare } from '@yamb/core/transform';
-import { markdown } from '@yamb/markdown';
-import { microtypo } from '@yamb/microtypo';
+import { markdown } from 'yamb-markdown';
+import { microtypo } from 'yamb-microtypo';
+import { prepare } from 'yamb/transform';
 
 await using md = markdown();
 await using typo = microtypo();
@@ -276,15 +276,15 @@ For cached preparation, build the key from the same source snapshot passed to `p
 
 | Import | Exports |
 | --- | --- |
-| `@yamb/core` | `yamb`, `Yamb`, `Post`, `PostCollection`, `AsyncIteratorHelper`, status/order constants and five common schemas |
-| `@yamb/core/constants` | `Status`, `statusValues`, `Order`, `orderValues` |
-| `@yamb/core/errors` | `YambError` and domain subclasses |
-| `@yamb/core/schemas` | Zod field, Post, query, selection, configuration and transformer schemas; `encodeInstant` |
-| `@yamb/core/transform` | `transform`, `prepare` |
-| `@yamb/core/async-iterator` | `AsyncIteratorHelper` |
-| `@yamb/core/url` | `url(input, base, params?)` |
-| `@yamb/core/internal` | `store(label)` returns isolated WeakMap-backed `{ get, set }` |
-| `@yamb/core/package.json` | Package metadata |
+| `yamb` | `yamb`, `Yamb`, `Post`, `PostCollection`, `AsyncIteratorHelper`, status/order constants and five common schemas |
+| `yamb/constants` | `Status`, `statusValues`, `Order`, `orderValues` |
+| `yamb/errors` | `YambError` and domain subclasses |
+| `yamb/schemas` | Zod field, Post, query, selection, configuration and transformer schemas; `encodeInstant` |
+| `yamb/transform` | `transform`, `prepare` |
+| `yamb/async-iterator` | `AsyncIteratorHelper` |
+| `yamb/url` | `url(input, base, params?)` |
+| `yamb/internal` | `store(label)` returns isolated WeakMap-backed `{ get, set }` |
+| `yamb/package.json` | Package metadata |
 
 `url` returns a native URL using base's pathname as a directory prefix, even without a trailing slash. Absolute/root-relative inputs retain native semantics; params set string query values. Input/base URL objects remain unchanged.
 

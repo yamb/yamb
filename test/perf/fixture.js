@@ -1,5 +1,5 @@
-import { yamb } from '@yamb/core';
-import { PostNotFoundError, StorageDuplicateError } from '@yamb/core/errors';
+import { yamb } from 'yamb';
+import { PostNotFoundError, StorageDuplicateError } from 'yamb/errors';
 
 export function postData(bytes = 1024, index = 0) {
   const paragraph = `# Yamb baseline
