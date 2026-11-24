@@ -73,13 +73,29 @@ export function encodeInstant(instant) {
   return instant.toString(STORAGE_PRECISION);
 }
 
+function isHttpUrl(value) {
+  // oxlint-disable-next-line no-control-regex
+  if (/[\\\x00-\x20\x7f]/u.test(value) || !/^https?:\/\//i.test(value)) {
+    return false;
+  }
+
+  const url = URL.parse(value);
+
+  return url !== null && !url.username && !url.password;
+}
+
+const HttpUrlSchema = z
+  .string()
+  .trim()
+  .refine(isHttpUrl, 'must be an absolute HTTP(S) URL without credentials');
+
 const HttpOrRelativeSchema = z.union([
   z.literal(''),
   z
     .string()
     .regex(/^\.?\//, 'must start with / or ./')
     .refine((value) => URL.canParse(value, 'https://example.invalid/'), 'invalid relative URL'),
-  z.httpUrl()
+  HttpUrlSchema
 ]);
 
 export const TitleSchema = z
@@ -113,15 +129,7 @@ const CoverUrlSchema = z
       return URL.canParse(value, 'https://example.invalid/');
     }
 
-    if (!/^https?:\/\//i.test(value) || !URL.canParse(value)) {
-      return false;
-    }
-
-    const url = new URL(value);
-
-    return (
-      (url.protocol === 'http:' || url.protocol === 'https:') && !url.username && !url.password
-    );
+    return isHttpUrl(value);
   }, 'invalid cover URL');
 
 const CoverObjectSchema = z.strictObject({
@@ -287,7 +295,7 @@ export const ConfigSchema = z.strictObject({
   storage: StorageContract,
   options: z.instanceof(z.ZodObject).optional(),
   renderers: z.record(z.string(), RendererContract).optional(),
-  base: z.httpUrl().optional(),
+  base: HttpUrlSchema.optional(),
   timeZone: TimeZoneSchema.optional(),
   signal: z.instanceof(AbortSignal).optional(),
   slugger: z.function().optional(),
