@@ -76,10 +76,12 @@ async function publish(input, digest, mode) {
   );
   const integrity = `sha512-${createHash('sha512').update(bytes).digest('base64')}`;
 
-  const { name, version } = JSON.parse(await readFile('package.json', 'utf8'));
+  const { version } = JSON.parse(await readFile('package.json', 'utf8'));
+  const name = '@yamb/core';
   const packed = JSON.parse(execFileSync('tar', ['-xOzf', archive, 'package/package.json']));
   assert.equal(packed.name, name, 'Archive package name differs');
   assert.equal(packed.version, version, 'Archive package version differs');
+  assert.equal(packed.publishConfig.registry, registry.href);
 
   const token = process.env.GITHUB_TOKEN;
   const verify = () => published(name, version, token, integrity, bytes.length);

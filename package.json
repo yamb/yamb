@@ -1,6 +1,6 @@
 {
-  "name": "@yamb/core",
-  "version": "1.0.0",
+  "name": "yamb",
+  "version": "1.0.1",
   "description": "Editable posts, lazy collections and extension APIs for Yamb",
   "keywords": [
     "blog",

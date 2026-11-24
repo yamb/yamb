@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { transform } from '@yamb/core/transform';
+import { transform } from 'yamb/transform';
 
 const stage = (name, fn) => ({ name, version: '1', transform: fn });
 

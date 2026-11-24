@@ -1,22 +1,24 @@
-# @yamb/core
+# yamb
 
 [![npm version][npm-image]][npm-url] [![Build status][github-actions-image]][github-actions-url] [![Coverage status][coveralls-image]][coveralls-url] [![Dependency status][libraries-image]][libraries-url]
 
 Yamb manages editable posts and lazy collections for websites, scripts and jobs. The application supplies storage and can add content preparation and renderers.
+
+For GitHub Packages, route the `@yamb` scope to `https://npm.pkg.github.com` and install `@yamb/core`.
 
 ## Quick start
 
 Requires Node.js 26.13 or later. Install core and [file storage](https://github.com/yamb/storage-files).
 
 ```bash
-pnpm add @yamb/core @yamb/storage-files
+pnpm add yamb @meritt/yamb-storage-files
 ```
 
 Use a trusted directory for `./posts`.
 
 ```js
-import { yamb } from '@yamb/core';
-import { files } from '@yamb/storage-files';
+import { files } from '@meritt/yamb-storage-files';
+import { yamb } from 'yamb';
 
 await using blog = yamb({
   storage: files({
@@ -74,11 +76,11 @@ for await (const article of blog.published.tagged('javascript').recent(10)) {
 
 MIT. See `LICENSE`.
 
-[npm-image]: https://img.shields.io/npm/v/@yamb/core?style=flat
-[npm-url]: https://www.npmjs.com/package/@yamb/core
+[npm-image]: https://img.shields.io/npm/v/yamb?style=flat
+[npm-url]: https://www.npmjs.com/package/yamb
 [github-actions-image]: https://github.com/yamb/yamb/actions/workflows/ci.yml/badge.svg
 [github-actions-url]: https://github.com/yamb/yamb/actions/workflows/ci.yml
 [coveralls-image]: https://coveralls.io/repos/github/yamb/yamb/badge.svg
 [coveralls-url]: https://coveralls.io/github/yamb/yamb
-[libraries-image]: https://img.shields.io/librariesio/release/npm/%40yamb%2Fcore?style=flat
-[libraries-url]: https://libraries.io/npm/%40yamb%2Fcore
+[libraries-image]: https://img.shields.io/librariesio/release/npm/yamb?style=flat
+[libraries-url]: https://libraries.io/npm/yamb

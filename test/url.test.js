@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { url } from '@yamb/core/url';
+import { url } from 'yamb/url';
 
 import { Status } from '../src/constants/index.js';
 import { UriOriginError } from '../src/errors/index.js';
