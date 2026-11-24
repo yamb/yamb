@@ -2,6 +2,13 @@ import { z } from 'zod';
 
 import { statusValues, orderValues, Status } from '../constants/index.js';
 
+function maxUnits(schema, limit, label) {
+  return schema.refine(
+    (value) => value.length <= limit,
+    `${label} must be ${limit} UTF-16 units or less`
+  );
+}
+
 export const UriSchema = z
   .string()
   .regex(
@@ -19,47 +26,48 @@ export const VersionSchema = z
   .min(1, 'version must not be empty')
   .max(64, 'version must be 64 chars or less');
 
+export const SLUG_LIMIT = 200;
+
 export const SlugSchema = z
   .string()
   .regex(/^[a-z0-9-]+$/, 'slug must be lowercase letters, digits, dashes')
   .min(1)
-  .max(200);
+  .max(SLUG_LIMIT);
 
-export const TagSchema = z
-  .string()
-  .min(1)
-  .refine((value) => value.length <= 64, 'tag must be 64 UTF-16 units or less');
+export const TagSchema = maxUnits(z.string().min(1), 64, 'tag');
 
 export const StatusSchema = z.enum(statusValues);
 export const OrderSchema = z.enum(orderValues);
 
-const STORAGE_PRECISION = { fractionalSecondDigits: 9 };
+export const MIN_INSTANT = Temporal.Instant.from('0001-01-01T00:00:00Z');
+export const MAX_INSTANT = Temporal.Instant.from('9999-12-31T23:59:59.999999999Z');
+
+export function encodeInstant(instant) {
+  return instant.toString({ fractionalSecondDigits: 9 });
+}
 
 export const InstantSchema = z.codec(
-  z.union([z.instanceof(Temporal.Instant), z.instanceof(Date), z.string()]),
+  z.union([z.instanceof(Temporal.Instant), z.string()]),
   z.instanceof(Temporal.Instant),
   {
     decode(value, ctx) {
       let instant;
 
       try {
-        if (value instanceof Temporal.Instant) {
-          instant = value;
-        } else if (value instanceof Date) {
-          instant = Temporal.Instant.fromEpochMilliseconds(value.getTime());
-        } else {
-          instant = Temporal.Instant.from(value);
-        }
+        instant = value instanceof Temporal.Instant ? value : Temporal.Instant.from(value);
       } catch {
         ctx.issues.push({ code: 'custom', message: `invalid instant: ${value}`, input: value });
 
         return z.NEVER;
       }
 
-      if (!/^(?!0000-)\d{4}-/.test(instant.toString())) {
+      if (
+        Temporal.Instant.compare(instant, MIN_INSTANT) < 0 ||
+        Temporal.Instant.compare(instant, MAX_INSTANT) > 0
+      ) {
         ctx.issues.push({
           code: 'custom',
-          message: `instant year out of sortable range (0001-9999): ${instant.toString()}`,
+          message: `instant year out of sortable range (0001-9999): ${value}`,
           input: value
         });
 
@@ -68,15 +76,9 @@ export const InstantSchema = z.codec(
 
       return instant;
     },
-    encode(instant) {
-      return instant.toString(STORAGE_PRECISION);
-    }
+    encode: encodeInstant
   }
 );
-
-export function encodeInstant(instant) {
-  return instant.toString(STORAGE_PRECISION);
-}
 
 function isHttpUrl(value) {
   // oxlint-disable-next-line no-control-regex
@@ -94,59 +96,54 @@ const HttpUrlSchema = z
   .trim()
   .refine(isHttpUrl, 'must be an absolute HTTP(S) URL without credentials');
 
+function isRelativeUrl(value) {
+  // oxlint-disable-next-line no-control-regex
+  if (/[\\\x00-\x1f\x7f]/u.test(value)) {
+    return false;
+  }
+
+  const url = URL.parse(value, 'https://example.invalid/');
+
+  return url !== null && !url.username && !url.password;
+}
+
 const HttpOrRelativeSchema = z.union([
   z.literal(''),
   z
     .string()
     .regex(/^\.?\//, 'must start with / or ./')
-    .refine((value) => URL.canParse(value, 'https://example.invalid/'), 'invalid relative URL'),
+    .refine(isRelativeUrl, 'invalid relative URL'),
   HttpUrlSchema
 ]);
 
-export const TitleSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .refine((value) => value.length <= 500, 'title must be 500 UTF-16 units or less');
-export const PreviewSchema = z
-  .string()
-  .refine((value) => value.length <= 5000, 'preview must be 5000 UTF-16 units or less');
-export const TextSchema = z
-  .string()
-  .refine((value) => value.length <= 1024 * 1024, 'text must be 1048576 UTF-16 units or less');
+export const TitleSchema = maxUnits(z.string().trim().min(1), 500, 'title');
+export const PreviewSchema = maxUnits(z.string(), 5000, 'preview');
+export const TextSchema = maxUnits(z.string(), 1024 * 1024, 'text');
+
+function isCoverUrl(value) {
+  if (value === '') {
+    return true;
+  }
+
+  if (value.includes(' ') || value.startsWith('//')) {
+    return false;
+  }
+
+  return /^\.?\//.test(value) ? isRelativeUrl(value) : isHttpUrl(value);
+}
+
 const CoverUrlSchema = z
   .string()
   .refine((value) => value.length <= 4096, {
     error: 'cover URL must be 4096 UTF-16 units or less',
     abort: true
   })
-  .refine((value) => {
-    // oxlint-disable-next-line no-control-regex
-    if (/[\\\x00-\x20\x7f]/u.test(value) || value.startsWith('//')) {
-      return false;
-    }
-
-    if (value === '') {
-      return true;
-    }
-
-    if (value.startsWith('/') || value.startsWith('./')) {
-      return URL.canParse(value, 'https://example.invalid/');
-    }
-
-    return isHttpUrl(value);
-  }, 'invalid cover URL');
+  .refine(isCoverUrl, 'invalid cover URL');
 
 const CoverObjectSchema = z.strictObject({
   url: CoverUrlSchema.optional(),
-  alt: z
-    .string()
-    .refine((value) => value.length <= 5000, 'cover alt must be 5000 UTF-16 units or less')
-    .optional(),
-  caption: z
-    .string()
-    .refine((value) => value.length <= 5000, 'cover caption must be 5000 UTF-16 units or less')
-    .optional(),
+  alt: maxUnits(z.string(), 5000, 'cover alt').optional(),
+  caption: maxUnits(z.string(), 5000, 'cover caption').optional(),
   width: z.number().int().min(1).max(100000).optional(),
   height: z.number().int().min(1).max(100000).optional()
 });
@@ -155,7 +152,7 @@ function cleanCover(value) {
   return Object.fromEntries(Object.entries(value).filter(([, field]) => field !== undefined));
 }
 
-export const CoverSchema = z.codec(CoverObjectSchema, CoverObjectSchema, {
+export const CoverSchema = z.codec(CoverObjectSchema, z.custom(), {
   decode: cleanCover,
   encode: cleanCover
 });
@@ -235,8 +232,7 @@ export const OptionFilterSchema = z
 
 export const QuerySchema = z.strictObject({
   status: StatusSchema.optional(),
-  tag: TagSchema.optional(),
-  tags: z.array(TagSchema).optional(),
+  tags: TagsSchema.optional(),
   uri: UriSchema.optional(),
   before: InstantSchema.optional(),
   after: InstantSchema.optional(),
@@ -285,16 +281,14 @@ const RendererContract = z.custom(
   { message: 'renderer must have name, version, and post() or collection()' }
 );
 
-function isValidTimeZone(timeZone) {
+const TimeZoneSchema = z.string().transform((value, ctx) => {
   try {
-    return Boolean(new Intl.DateTimeFormat('en-US', { timeZone }));
+    return new Temporal.ZonedDateTime(0n, value).timeZoneId;
   } catch {
-    return false;
-  }
-}
+    ctx.issues.push({ code: 'custom', message: 'invalid IANA time zone', input: value });
 
-const TimeZoneSchema = z.string().refine(isValidTimeZone, {
-  error: 'invalid IANA time zone'
+    return z.NEVER;
+  }
 });
 
 export const ConfigSchema = z.strictObject({

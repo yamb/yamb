@@ -1,5 +1,5 @@
-import { YambNotOpenError } from '../../errors/index.js';
-import { effectiveSignal } from '../../signal.js';
+import { UriSchema } from '../../schemas/zod.js';
+import { begin } from '../../signal.js';
 import { getState } from '../internal.js';
 
 export default {
@@ -7,22 +7,15 @@ export default {
 
   async fn(yamb, input, options = {}) {
     const state = getState(yamb);
-
-    if (!state.isOpen) {
-      throw new YambNotOpenError();
-    }
-
-    const signal = effectiveSignal(yamb, options);
-
-    signal?.throwIfAborted();
-
+    const signal = begin(yamb, options);
     const uri = yamb.uri(input);
-    const raw = await state.storage.fetch(uri, { signal });
 
-    if (!raw) {
+    if (!UriSchema.safeParse(uri).success) {
       return null;
     }
 
-    return state._hydrate(raw);
+    const raw = await state.storage.fetch(uri, { signal });
+
+    return raw ? state._hydrate(raw) : null;
   }
 };

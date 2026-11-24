@@ -1,7 +1,5 @@
 import { randomUUIDv7 } from 'node:crypto';
 
-import { z } from 'zod';
-
 import { Status } from '../../constants/index.js';
 import {
   YambNotOpenError,
@@ -11,12 +9,15 @@ import {
 } from '../../errors/index.js';
 import { applySaveLifecycle } from '../../lifecycle/dates.js';
 import { reportError } from '../../report-error.js';
+import { parse } from '../../schemas/parse.js';
 import { PostSchema } from '../../schemas/zod.js';
-import { effectiveSignal } from '../../signal.js';
+import { begin } from '../../signal.js';
+import { fitSlug } from '../../slug/fit.js';
 import { buildUri } from '../../uri.js';
 import { getState as getYambState } from '../../yamb/internal.js';
+import { record } from '../../yamb/lookups.js';
 import { getState } from '../internal.js';
-import { invalidateState, setFieldValue, touchField } from '../lib/field.js';
+import { replaceField } from '../lib/field.js';
 import { reconcile } from '../lib/observe.js';
 import { enqueueOperation } from '../lib/operations.js';
 import { resolveUri } from '../lib/resolve-uri.js';
@@ -31,10 +32,6 @@ import {
 import { expectedVersion } from '../lib/version.js';
 
 function assertMode(state, data, mode, expected) {
-  if (mode !== null && mode !== 'insert' && mode !== 'update') {
-    throw new PostValidationError('unknown save mode', { details: { field: 'mode' } });
-  }
-
   if (expected !== undefined && !data.id) {
     throw new PostValidationError('cannot insert a post with an expected version', {
       details: { field: 'expected' }
@@ -62,8 +59,6 @@ function assertMode(state, data, mode, expected) {
 }
 
 function confirm(state, revision, data) {
-  let changed = false;
-
   for (const field of Object.keys(data)) {
     if ((state.fieldRevisions?.get(field) ?? 0) !== (revision.fields.get(field) ?? 0)) {
       continue;
@@ -84,26 +79,15 @@ function confirm(state, revision, data) {
       !(current instanceof Temporal.Instant)
     ) {
       reconcile(current, saved);
-      touchField(state, field, { authored: false, invalidate: false });
     } else {
-      setFieldValue(state, field, saved, { authored: false, invalidate: false });
+      replaceField(state, field, saved);
     }
 
-    changed = true;
+    state.cache.hash = undefined;
   }
 
   state.pristine = copyOwned(data);
   state.confirmedRevisions = revision.fields;
-
-  for (const field of state.touched ?? []) {
-    if ((state.fieldRevisions?.get(field) ?? 0) <= (revision.fields.get(field) ?? 0)) {
-      state.touched.delete(field);
-    }
-  }
-
-  if (changed) {
-    invalidateState(state);
-  }
 }
 
 export default {
@@ -112,23 +96,15 @@ export default {
   async fn(post, options = {}) {
     const state = getState(post);
     const { yamb } = state;
-    const signal = effectiveSignal(yamb, options);
+    const signal = begin(yamb, options);
     const mode = options.mode ?? null;
     const explicit = expectedVersion(options);
 
-    if (!yamb.isOpen) {
-      throw new YambNotOpenError('yamb instance is not open');
+    if (mode !== null && mode !== 'insert' && mode !== 'update') {
+      throw new PostValidationError('unknown save mode', { details: { field: 'mode' } });
     }
-
-    signal?.throwIfAborted();
 
     const revision = captureRevision(state);
-
-    if (state.removed) {
-      throw new PostNotFoundError('cannot save a removed post', { details: { id: state.data.id } });
-    }
-
-    assertMode(state, revision.data, mode, explicit);
 
     return enqueueOperation(state, signal, async () => {
       if (!yamb.isOpen) {
@@ -159,7 +135,7 @@ export default {
       applySaveLifecycle(data, yamb.clock);
 
       if (!data.slug) {
-        data.slug = yamb.slugger(data.title || '');
+        data.slug = fitSlug(yamb.slugger(data.title || ''));
 
         if (!data.slug) {
           throw new PostValidationError('slug cannot be derived from empty title', {
@@ -183,16 +159,8 @@ export default {
 
       data.uri = uri;
 
-      const validation = PostSchema.safeParse(data);
-
-      if (!validation.success) {
-        throw new PostValidationError(`invalid post: ${z.prettifyError(validation.error)}`, {
-          details: { issues: validation.error.issues }
-        });
-      }
-
-      const saved = validation.data;
-      const unknownRefs = saved.links.related.filter((id) => !yamb.locate?.(id));
+      const saved = parse(PostSchema, data, PostValidationError, 'post');
+      const unknownRefs = saved.links.related.filter((id) => !yambState.byId.has(id));
 
       if (unknownRefs.length > 0) {
         throw new LinkRefNotFoundError('unknown link ids', { details: { unknownRefs } });
@@ -217,15 +185,7 @@ export default {
         saved.id = result.id;
       }
 
-      const confirmed = yambState.byId.get(saved.id);
-
-      yambState.byId.set(saved.id, uri);
-
-      if (confirmed && confirmed !== uri && yambState.byUri.get(confirmed) === saved.id) {
-        yambState.byUri.delete(confirmed);
-      }
-
-      yambState.byUri.set(uri, saved.id);
+      record(yambState, saved.id, uri);
       state.version = raw.version;
       confirm(state, revision, saved);
 

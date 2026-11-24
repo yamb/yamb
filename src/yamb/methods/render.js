@@ -1,19 +1,15 @@
 import { AsyncIteratorHelper } from '../../async-iterator/index.js';
 import {
+  isCancellation,
+  RendererFailedError,
   RendererInputError,
   RendererMissingError,
   RendererScopeError
 } from '../../errors/index.js';
-import { normalizeRenderError } from '../../render-error.js';
 import { effectiveSignal } from '../../signal.js';
 import { getState } from '../internal.js';
 
-async function* snapshots(posts, signal) {
-  for await (const post of AsyncIteratorHelper.from(posts, { signal })) {
-    signal?.throwIfAborted();
-    yield typeof post?.toJSON === 'function' ? post.toJSON() : post;
-  }
-}
+const toData = (post) => (typeof post?.toJSON === 'function' ? post.toJSON() : post);
 
 export default {
   name: 'render',
@@ -62,7 +58,7 @@ export default {
           throw new RendererInputError('input.posts must be iterable or async iterable');
         }
 
-        value = { ...input, posts: snapshots(posts, signal) };
+        value = { ...input, posts: AsyncIteratorHelper.from(posts, { signal }).map(toData) };
       }
 
       const result = await renderer[scope](value, {
@@ -78,11 +74,11 @@ export default {
 
       return result;
     } catch (err) {
-      if (signal?.aborted && Object.is(err, signal.reason)) {
+      if (isCancellation(err, signal) || err?.code?.startsWith?.('YAMB_')) {
         throw err;
       }
 
-      throw normalizeRenderError(err, format);
+      throw new RendererFailedError(`renderer "${format}" failed`, { cause: err });
     }
   }
 };

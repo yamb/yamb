@@ -1,6 +1,18 @@
 import { reportError } from '../../report-error.js';
 import { getState } from '../internal.js';
 
+export async function dispose(yamb, state, renderers, op) {
+  for (const renderer of renderers) {
+    if (typeof renderer.dispose === 'function') {
+      try {
+        await renderer.dispose({ yamb, timeZone: state.timeZone });
+      } catch (err) {
+        reportError(state.onError, err, { op, name: renderer.name });
+      }
+    }
+  }
+}
+
 async function closeOnce(yamb, state) {
   if (state.opening) {
     try {
@@ -10,21 +22,14 @@ async function closeOnce(yamb, state) {
     }
   }
 
-  for (const renderer of Object.values(state.renderers)) {
-    if (typeof renderer.dispose === 'function') {
-      try {
-        await renderer.dispose({ yamb, timeZone: state.timeZone });
-      } catch (err) {
-        reportError(state.onError, err, { op: 'close.renderer', name: renderer.name });
-      }
-    }
-  }
+  await dispose(yamb, state, Object.values(state.renderers), 'close.renderer');
 
   try {
     await state.storage.close({});
   } finally {
-    state.byId.clear();
-    state.byUri.clear();
+    state.walks.clear();
+    state.byId = new Map();
+    state.byUri = new Map();
     state.isOpen = false;
   }
 }

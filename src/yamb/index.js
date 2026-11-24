@@ -1,33 +1,34 @@
-import { z } from 'zod';
-
 import { YambConfigError } from '../errors/index.js';
 import { configureOptions } from '../options.js';
 import { Post } from '../post/index.js';
+import { parse } from '../schemas/parse.js';
 import { ConfigSchema } from '../schemas/zod.js';
 import { defaultSlugger } from '../slug/slugger.js';
-import { setState } from './internal.js';
+import { normalizeUri } from '../uri.js';
+import { getState, setState } from './internal.js';
 import methods from './methods.js';
-import props from './props.js';
+
+const exposed = [
+  'storage',
+  'renderers',
+  'base',
+  'timeZone',
+  'signal',
+  'slugger',
+  'clock',
+  'onError',
+  'isOpen'
+];
 
 export class Yamb {
   constructor(config) {
-    const result = ConfigSchema.safeParse(config);
-
-    if (!result.success) {
-      throw new YambConfigError(`invalid config: ${z.prettifyError(result.error)}`, {
-        details: { issues: result.error.issues }
-      });
-    }
-
-    const validated = result.data;
+    const validated = parse(ConfigSchema, config, YambConfigError, 'config');
 
     configureOptions(this, validated.options);
 
-    const renderers = { ...validated.renderers };
-
     const state = {
       storage: validated.storage,
-      renderers,
+      renderers: { ...validated.renderers },
       base: validated.base ?? 'http://localhost',
       timeZone: validated.timeZone ?? 'UTC',
       signal: validated.signal,
@@ -36,60 +37,64 @@ export class Yamb {
       onError: validated.onError,
       isOpen: false,
       byId: new Map(),
-      byUri: new Map()
+      byUri: new Map(),
+      walks: new Set(),
+      _hydrate: (raw) => new Post(this, raw)
     };
 
-    state._hydrate = (raw) => new Post(this, raw, { pristine: true });
-
-    Object.defineProperty(this, 'storage', {
-      get: () => state.storage
-    });
-
-    Object.defineProperty(this, 'renderers', {
-      get: () => state.renderers
-    });
-
-    Object.defineProperty(this, 'base', { get: () => state.base });
-
-    Object.defineProperty(this, 'timeZone', {
-      get: () => state.timeZone
-    });
-
-    Object.defineProperty(this, 'signal', { get: () => state.signal });
-
-    Object.defineProperty(this, 'slugger', {
-      get: () => state.slugger
-    });
-
-    Object.defineProperty(this, 'clock', { get: () => state.clock });
-
-    Object.defineProperty(this, 'onError', {
-      get: () => state.onError
-    });
-
-    Object.defineProperty(this, 'isOpen', { get: () => state.isOpen });
     Object.defineProperty(this, '_hydrate', { value: state._hydrate });
-
     setState(this, state);
   }
 
+  get published() {
+    return this.all().published();
+  }
+
+  get drafts() {
+    return this.all().drafts();
+  }
+
+  get scheduled() {
+    return this.all().scheduled();
+  }
+
+  get archived() {
+    return this.all().archived();
+  }
+
+  uri(input) {
+    return normalizeUri(input, getState(this).base);
+  }
+
+  locate(id) {
+    return getState(this).byId.get(id);
+  }
+
+  identify(uri) {
+    return getState(this).byUri.get(uri);
+  }
+
+  has(uri) {
+    return getState(this).byUri.has(uri);
+  }
+
+  [Symbol.asyncDispose]() {
+    return this.close();
+  }
+
+  [Symbol.asyncIterator]() {
+    return this.all()[Symbol.asyncIterator]();
+  }
+
   static {
-    for (const prop of props) {
-      const descriptor = { enumerable: true, configurable: false };
-
-      if (prop.get !== false) {
-        descriptor.get = function () {
-          return prop.get(this);
-        };
-      }
-
-      if (prop.set !== false) {
-        descriptor.set = function (value) {
-          prop.set(this, value);
-        };
-      }
-
-      Object.defineProperty(this.prototype, prop.name, descriptor);
+    for (const name of exposed) {
+      Object.defineProperty(this.prototype, name, {
+        get() {
+          return getState(this)[name];
+        },
+        enumerable: true,
+        configurable: false
+      });
     }
 
     for (const method of methods) {

@@ -1,114 +1,66 @@
-import { StorageReadError, PostDateError, PostValidationError } from '../errors/index.js';
+import { PostValidationError, StorageReadError } from '../errors/index.js';
 import { getOptionsConfig } from '../options.js';
-import { IdSchema, InstantSchema, LinksSchema, PostSchema, VersionSchema } from '../schemas/zod.js';
+import { IdSchema, LinksSchema, PostSchema, VersionSchema } from '../schemas/zod.js';
 import { getState, setState } from './internal.js';
-import { validateField } from './lib/field.js';
-import { copyOwned, copyValue } from './lib/snapshot.js';
+import { prepareInput, readField, validateField, writeField } from './lib/field.js';
+import { copyOwned } from './lib/snapshot.js';
 import methods from './methods.js';
 import props from './props.js';
-import cover from './props/cover.js';
 
 const StoredSchema = PostSchema.safeExtend({
   id: IdSchema,
+  version: VersionSchema.nullable().optional(),
   links: LinksSchema.extend({ related: LinksSchema.shape.related.removeDefault() })
 });
 
+const byName = new Map(props.map((prop) => [prop.name, prop]));
 const descriptors = {};
 
-function storedVersion(raw) {
-  const version = raw.version ?? null;
+function load(raw, optionsConfig) {
+  try {
+    const { version = null, ...data } = StoredSchema.parse(raw);
 
-  if (version !== null && !VersionSchema.safeParse(version).success) {
-    throw new StorageReadError('corrupt stored post: invalid version', {
-      details: { id: raw.id, uri: raw.uri, field: 'version' }
+    data.options = optionsConfig.validate(data.options);
+
+    return { data, version };
+  } catch (cause) {
+    throw new StorageReadError('corrupt stored post', {
+      cause,
+      details: {
+        id: raw?.id,
+        uri: raw?.uri,
+        field: cause.details?.field ?? cause.issues?.[0]?.path?.[0]
+      }
     });
   }
-
-  return version;
 }
 
-function hydrate(raw, stored, optionsConfig) {
-  for (const field of Reflect.ownKeys(raw)) {
-    if (!Object.hasOwn(descriptors, field) && !(stored && field === 'version')) {
-      const ErrorClass = stored ? StorageReadError : PostValidationError;
+function build(input, optionsConfig) {
+  const state = { optionsConfig };
+  const data = {};
 
-      throw new ErrorClass('unknown post field', { details: { field } });
+  for (const field of Reflect.ownKeys(input)) {
+    const prop = byName.get(field);
+
+    if (!prop) {
+      throw new PostValidationError('unknown post field', { details: { field } });
+    }
+
+    if (input[field] !== undefined) {
+      data[field] = validateField(prop, prepareInput(prop, input[field]), state);
     }
   }
 
-  const data = { ...raw };
+  data.cover ??= {};
+  data.options ??= optionsConfig.validate(undefined);
 
-  delete data.version;
-
-  for (const field of ['createdAt', 'updatedAt', 'publishedAt']) {
-    if (data[field] !== undefined && !(data[field] instanceof Temporal.Instant)) {
-      try {
-        data[field] = InstantSchema.parse(data[field]);
-      } catch (err) {
-        if (stored) {
-          throw new StorageReadError(`corrupt stored post: invalid ${field}`, {
-            cause: err,
-            details: { id: raw.id, uri: raw.uri, field }
-          });
-        }
-
-        throw new PostDateError(`invalid ${field}`, {
-          cause: err,
-          details: { field, value: data[field] }
-        });
-      }
-    }
-  }
-
-  for (const field of Object.keys(data)) {
-    if (field === 'options') {
-      continue;
-    }
-
-    data[field] = copyValue(data[field]);
-  }
-
-  try {
-    data.options = optionsConfig.normalize(data.options);
-  } catch (cause) {
-    if (stored) {
-      throw new StorageReadError('corrupt stored post: invalid options', {
-        cause,
-        details: { id: raw.id, uri: raw.uri, field: 'options' }
-      });
-    }
-
-    throw cause;
-  }
-
-  data.cover = validateField(cover, data.cover === undefined ? {} : data.cover);
-
-  if (stored) {
-    StoredSchema.parse(data);
-  }
-
-  return data;
+  return { data, version: null };
 }
 
 export class Post {
   constructor(yamb, raw, { pristine = true } = {}) {
     const optionsConfig = getOptionsConfig(yamb);
-    let data;
-    let version = null;
-
-    try {
-      data = hydrate(raw ?? {}, pristine, optionsConfig);
-      version = pristine ? storedVersion(raw ?? {}) : null;
-    } catch (cause) {
-      if (!pristine || cause instanceof StorageReadError) {
-        throw cause;
-      }
-
-      throw new StorageReadError('corrupt stored post', {
-        cause,
-        details: { id: raw?.id, uri: raw?.uri }
-      });
-    }
+    const { data, version } = pristine ? load(raw, optionsConfig) : build(raw, optionsConfig);
 
     setState(this, {
       yamb,
@@ -116,8 +68,7 @@ export class Post {
       data,
       pristine: pristine ? copyOwned(data) : null,
       version,
-      cache: {},
-      touched: new Set()
+      cache: {}
     });
 
     Object.defineProperties(this, descriptors);
@@ -126,21 +77,18 @@ export class Post {
 
   static {
     for (const prop of props) {
-      const descriptor = { enumerable: true, configurable: false };
-
-      if (prop.get !== false) {
-        descriptor.get = function () {
-          return prop.get(this);
-        };
-      }
-
-      if (prop.set !== false) {
-        descriptor.set = function (value) {
-          prop.set(this, value);
-        };
-      }
-
-      descriptors[prop.name] = descriptor;
+      descriptors[prop.name] = {
+        enumerable: true,
+        configurable: false,
+        get() {
+          return prop.read ? prop.read(getState(this)) : readField(this, prop);
+        },
+        set: prop.readonly
+          ? undefined
+          : function (value) {
+              writeField(this, prop, value === undefined && prop.absent ? prop.absent : value);
+            }
+      };
     }
 
     Object.defineProperty(this.prototype, 'version', {

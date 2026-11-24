@@ -127,3 +127,27 @@ test('rename onto own existing row (same id) → no collision', async () => {
 
   assert.equal(uri, 'drafts/hello');
 });
+
+test('insert draft collision keeps suffixed slugs within 200 characters', async () => {
+  const slug = 'a'.repeat(200);
+  const data = { slug, title: 'Long', status: 'draft', createdAt: t('2026-04-01T00:00:00Z') };
+  const fetched = [];
+
+  const uri = await resolveUri({
+    data,
+    yamb: makeYamb(async (u) => {
+      fetched.push(u);
+      return fetched.length <= 2 ? { id: 'other' } : null;
+    }),
+    uri: `drafts/${slug}`,
+    isInsert: true,
+    isRename: false
+  });
+
+  assert.deepEqual(
+    fetched.map((u) => u.length - 'drafts/'.length),
+    [200, 200, 200]
+  );
+  assert.match(data.slug, /^a{191}-[0-9a-f]{6}-2$/);
+  assert.equal(uri, `drafts/${data.slug}`);
+});

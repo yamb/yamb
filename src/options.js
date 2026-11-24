@@ -171,17 +171,11 @@ function prepare(schema = EmptySchema) {
         if (!Object.hasOwn(input, key)) {
           input[key] = copyOwned(defaults[key]);
         }
-
-        const preserved = parse(fields[key], copyOwned(input[key]), PostValidationError);
-
-        if (!isDeepStrictEqual(input[key], preserved)) {
-          throw new PostValidationError(`options.${key} must validate without transforming values`);
-        }
       }
 
       parse(JsonSchema, input, PostValidationError);
       const expected = copyOwned(input);
-      const output = copyValue(parse(schema, input, PostValidationError));
+      const output = parse(schema, input, PostValidationError);
 
       if (!isDeepStrictEqual(expected, output)) {
         throw new PostValidationError(

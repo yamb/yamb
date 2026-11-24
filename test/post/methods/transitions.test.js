@@ -33,7 +33,7 @@ function makePost(initialStatus = 'draft') {
     slugger: (t) => t.toLowerCase()
   };
 
-  setYambState(yamb, { byId: yamb.byId, byUri: yamb.byUri });
+  setYambState(yamb, { byId: yamb.byId, byUri: yamb.byUri, walks: new Set() });
 
   setState(post, {
     yamb,
@@ -92,11 +92,13 @@ test('schedule accepts ISO string via InstantSchema transform', async () => {
   assert.equal(getState(post).data.publishedAt.toString(), '2026-12-01T00:00:00Z');
 });
 
-test('schedule accepts Date via InstantSchema transform', async () => {
+test('schedule rejects a clock that does not return an instant', async () => {
   const { post } = makePost();
-  await schedule.fn(post, new Date('2026-12-01T00:00:00Z'));
-  assert.equal(getState(post).data.status, 'scheduled');
-  assert.equal(getState(post).data.publishedAt.toString(), '2026-12-01T00:00:00Z');
+  getState(post).yamb.clock = () => '2026-04-26T12:00:00Z';
+  await assert.rejects(() => schedule.fn(post, '2026-12-01T00:00:00Z'), {
+    code: 'YAMB_POST_DATE_INVALID'
+  });
+  assert.equal(getState(post).data.status, 'draft');
 });
 
 test('schedule rejects invalid instant input with PostDateError', async () => {

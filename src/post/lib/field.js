@@ -5,41 +5,33 @@ import { getState } from '../internal.js';
 import { observe } from './observe.js';
 import { copyValue } from './snapshot.js';
 
-export function invalidateState(state) {
-  state.cache = {};
+const URI_SOURCES = new Set(['slug', 'status', 'publishedAt']);
+
+export function touchField(state, field) {
+  state.fieldRevisions ??= new Map();
+
+  const revisions = state.fieldRevisions;
+
+  revisions.set(field, (revisions.get(field) ?? 0) + 1);
+
+  if (URI_SOURCES.has(field)) {
+    revisions.set('uri', (revisions.get('uri') ?? 0) + 1);
+  }
+
+  state.cache.hash = undefined;
 }
 
-export function touchField(state, field, { authored = true, invalidate = true } = {}) {
-  if (authored) {
-    state.fieldRevisions ??= new Map();
-
-    const revisions = state.fieldRevisions;
-
-    revisions.set(field, (revisions.get(field) ?? 0) + 1);
-
-    if (field === 'slug' || field === 'status' || field === 'publishedAt') {
-      revisions.set('uri', (revisions.get('uri') ?? 0) + 1);
-    }
-  }
-
-  (state.touched ??= new Set()).add(field);
-
-  if (field === 'slug' || field === 'status' || field === 'publishedAt') {
-    state.touched.add('uri');
-  }
-
-  if (invalidate) {
-    invalidateState(state);
-  }
-}
-
-export function setFieldValue(state, field, value, options) {
+export function replaceField(state, field, value) {
   if (state.data[field] !== value) {
     state.observed?.delete(field);
   }
 
   state.data[field] = value;
-  touchField(state, field, options);
+}
+
+export function setFieldValue(state, field, value) {
+  replaceField(state, field, value);
+  touchField(state, field);
 }
 
 export function validateField(prop, value, state) {
@@ -64,6 +56,10 @@ export function validateField(prop, value, state) {
   return result.data;
 }
 
+export function prepareInput(prop, value) {
+  return prop.error || value === null || typeof value !== 'object' ? value : copyValue(value);
+}
+
 export function writeField(post, prop, value) {
   const state = getState(post);
 
@@ -71,8 +67,7 @@ export function writeField(post, prop, value) {
     throw new PostValidationError(`cannot reenter an edit of ${prop.name}`);
   }
 
-  const input =
-    prop.error || value === null || typeof value !== 'object' ? value : copyValue(value);
+  const input = prepareInput(prop, value);
   const editing = state.editingField;
 
   state.editingField = prop.name;

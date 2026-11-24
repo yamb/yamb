@@ -1,10 +1,11 @@
 import { randomUUIDv7 } from 'node:crypto';
 
-import { PostValidationError, YambNotOpenError } from '../../errors/index.js';
+import { PostValidationError } from '../../errors/index.js';
 import { expectedVersion } from '../../post/lib/version.js';
 import { reportError } from '../../report-error.js';
+import { parse } from '../../schemas/parse.js';
 import { IdSchema } from '../../schemas/zod.js';
-import { effectiveSignal } from '../../signal.js';
+import { begin } from '../../signal.js';
 import { getState } from '../internal.js';
 
 export default {
@@ -12,14 +13,9 @@ export default {
 
   async fn(yamb, id, expected, options = {}) {
     const state = getState(yamb);
+    const signal = begin(yamb, options);
 
-    if (!state.isOpen) {
-      throw new YambNotOpenError();
-    }
-
-    if (!IdSchema.safeParse(id).success) {
-      throw new PostValidationError('fence requires a valid id', { details: { field: 'id' } });
-    }
+    parse(IdSchema, id, PostValidationError, 'id');
 
     if (expectedVersion({ expected }) === undefined) {
       throw new PostValidationError('fence requires an expected version or null', {
@@ -27,10 +23,7 @@ export default {
       });
     }
 
-    const signal = effectiveSignal(yamb, options);
     const version = randomUUIDv7();
-
-    signal?.throwIfAborted();
 
     try {
       await state.storage.fence(id, version, { signal, expected });

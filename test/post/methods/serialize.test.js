@@ -14,8 +14,7 @@ function makePost(data, pristine = null) {
     yamb: { timeZone: 'UTC' },
     data,
     pristine,
-    cache: {},
-    touched: new Set(Object.keys(data))
+    cache: {}
   });
 
   return post;

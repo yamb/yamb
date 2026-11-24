@@ -1,33 +1,14 @@
-import { closeIterator } from './close.js';
-import { toAsyncIterator } from './from.js';
+import { toAsyncIterable } from './from.js';
 import helpers from './helpers.js';
 import { getState, setState } from './internal.js';
 
-async function* iterate(state) {
-  const iterator = toAsyncIterator(state.source);
-  let failed = false;
-  let finished = false;
+async function* iterate({ source, signal }) {
+  signal?.throwIfAborted();
 
-  try {
-    while (true) {
-      state.signal?.throwIfAborted();
-      const { value, done } = await iterator.next();
-
-      if (done) {
-        finished = true;
-        return;
-      }
-
-      state.signal?.throwIfAborted();
-      yield value;
-    }
-  } catch (error) {
-    failed = true;
-    throw error;
-  } finally {
-    if (!finished) {
-      await closeIterator(iterator, { preserveError: failed });
-    }
+  for await (const value of toAsyncIterable(source)) {
+    signal?.throwIfAborted();
+    yield value;
+    signal?.throwIfAborted();
   }
 }
 
@@ -63,10 +44,12 @@ export class AsyncIteratorHelper {
   }
 
   static {
-    for (const helper of helpers) {
-      Object.defineProperty(this.prototype, helper.name, {
-        value(...args) {
-          return helper.fn(this, ...args);
+    for (const { name, lazy, check, run } of helpers) {
+      Object.defineProperty(this.prototype, name, {
+        value(arg, ...rest) {
+          const result = run(this, check ? check(name, arg) : arg, ...rest);
+
+          return lazy ? new AsyncIteratorHelper(result, { signal: getState(this).signal }) : result;
         },
         writable: false,
         configurable: false,

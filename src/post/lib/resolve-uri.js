@@ -1,5 +1,6 @@
 import { Status } from '../../constants/index.js';
 import { UriTakenError } from '../../errors/index.js';
+import { fitSlug } from '../../slug/fit.js';
 import { slugSuffix } from '../../slug/suffix.js';
 import { buildUri } from '../../uri.js';
 
@@ -19,16 +20,16 @@ export async function resolveUri({ data, yamb, uri, isInsert, isRename, signal }
     throw new UriTakenError(`uri "${uri}" already exists`, { details: { uri } });
   }
 
-  const suffix = await slugSuffix({ title: data.title, createdAt: data.createdAt });
+  const suffix = slugSuffix({ title: data.title, createdAt: data.createdAt });
 
-  const base = `${data.slug}-${suffix}`;
-  data.slug = base;
+  const { slug } = data;
+  data.slug = fitSlug(slug, suffix);
   let next = buildUri(data, yamb.timeZone);
 
   let counter = 2;
 
   while (await yamb.storage.fetch(next, { signal })) {
-    data.slug = `${base}-${counter}`;
+    data.slug = fitSlug(slug, `${suffix}-${counter}`);
     next = buildUri(data, yamb.timeZone);
 
     counter++;

@@ -47,12 +47,14 @@ export function normalizeUri(input, base) {
     });
   }
 
-  let { pathname } = url;
+  const { pathname } = url;
   const basePath = baseUrl.pathname.replace(/\/$/, '');
 
-  if (basePath && (pathname === basePath || pathname.startsWith(`${basePath}/`))) {
-    pathname = pathname.slice(basePath.length);
+  if (basePath && pathname !== basePath && !pathname.startsWith(`${basePath}/`)) {
+    throw new UriOriginError(`uri path "${pathname}" is outside base path "${basePath}/"`, {
+      details: { input, base }
+    });
   }
 
-  return pathname.replace(/^\/+/, '');
+  return pathname.slice(basePath.length).replace(/^\/+/, '');
 }

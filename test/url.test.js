@@ -114,10 +114,10 @@ test('normalizeUri strips the base path only on a segment boundary', () => {
     normalizeUri('https://nko.io/blog/2026/04/hello', 'https://nko.io/blog/'),
     '2026/04/hello'
   );
-  assert.equal(
-    normalizeUri('https://nko.io/blogroll/2026/04/hello', 'https://nko.io/blog/'),
-    'blogroll/2026/04/hello',
-    'a sibling path sharing the prefix must not become "roll/..."'
+  assert.throws(
+    () => normalizeUri('https://nko.io/blogroll/2026/04/hello', 'https://nko.io/blog/'),
+    { code: 'YAMB_URI_ORIGIN_MISMATCH' },
+    'a sibling path sharing the prefix is outside the base'
   );
 });
 

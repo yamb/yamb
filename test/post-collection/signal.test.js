@@ -5,6 +5,7 @@ import { PostCollection } from '../../src/post-collection/index.js';
 
 function makeYamb({ signal, captured } = {}) {
   return {
+    isOpen: true,
     signal,
     storage: {
       all(_query, options) {
@@ -98,6 +99,7 @@ test('PostCollection direct iteration throws AbortError when signal aborts mid-i
   const ac = new AbortController();
 
   const yamb = {
+    isOpen: true,
     signal: undefined,
     storage: makeInertStorage(items),
     _hydrate: (raw) => raw
