@@ -4,6 +4,7 @@ import { effectiveSignal } from '../../signal.js';
 import { getState as getYambState } from '../../yamb/internal.js';
 import { getState } from '../internal.js';
 import { enqueueOperation } from '../lib/operations.js';
+import { expectedVersion } from '../lib/version.js';
 
 export default {
   name: 'remove',
@@ -12,6 +13,7 @@ export default {
     const state = getState(post);
     const { yamb } = state;
     const signal = effectiveSignal(yamb, options);
+    const explicit = expectedVersion(options);
 
     if (!yamb.isOpen) {
       throw new YambNotOpenError();
@@ -33,8 +35,10 @@ export default {
         return;
       }
 
+      const expected = explicit === undefined ? state.version : explicit;
+
       try {
-        await yamb.storage.remove(id, { signal });
+        await yamb.storage.remove(id, { signal, expected });
       } catch (err) {
         reportError(yamb.onError, err, { op: 'remove', id, uri });
         throw err;
@@ -52,6 +56,7 @@ export default {
       state.removed = true;
       state.pristine = null;
       state.confirmedRevisions = undefined;
+      state.version = null;
     });
   }
 };

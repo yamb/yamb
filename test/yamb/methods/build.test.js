@@ -19,6 +19,7 @@ function makeStorage() {
       return { id: data.id ?? 'generated-id-1' };
     },
     remove: async () => {},
+    fence: async () => {},
     sync: async () => {},
     close: async () => {},
 

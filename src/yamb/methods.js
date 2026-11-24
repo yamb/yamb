@@ -4,6 +4,7 @@ import asyncIterator from './methods/async-iterator.js';
 import build from './methods/build.js';
 import close from './methods/close.js';
 import create from './methods/create.js';
+import fence from './methods/fence.js';
 import fetch from './methods/fetch.js';
 import find from './methods/find.js';
 import has from './methods/has.js';
@@ -23,6 +24,7 @@ export default [
   all,
   build,
   create,
+  fence,
   render,
   uri,
   locate,

@@ -1,3 +1,5 @@
+import { randomUUIDv7 } from 'node:crypto';
+
 import { z } from 'zod';
 
 import { Status } from '../../constants/index.js';
@@ -26,10 +28,17 @@ import {
   sameRevision,
   sameValue
 } from '../lib/snapshot.js';
+import { expectedVersion } from '../lib/version.js';
 
-function assertMode(state, data, mode) {
+function assertMode(state, data, mode, expected) {
   if (mode !== null && mode !== 'insert' && mode !== 'update') {
     throw new PostValidationError('unknown save mode', { details: { field: 'mode' } });
+  }
+
+  if (expected !== undefined && !data.id) {
+    throw new PostValidationError('cannot insert a post with an expected version', {
+      details: { field: 'expected' }
+    });
   }
 
   if (mode === 'insert' && data.id) {
@@ -105,6 +114,7 @@ export default {
     const { yamb } = state;
     const signal = effectiveSignal(yamb, options);
     const mode = options.mode ?? null;
+    const explicit = expectedVersion(options);
 
     if (!yamb.isOpen) {
       throw new YambNotOpenError('yamb instance is not open');
@@ -118,7 +128,7 @@ export default {
       throw new PostNotFoundError('cannot save a removed post', { details: { id: state.data.id } });
     }
 
-    assertMode(state, revision.data, mode);
+    assertMode(state, revision.data, mode, explicit);
 
     return enqueueOperation(state, signal, async () => {
       if (!yamb.isOpen) {
@@ -133,7 +143,7 @@ export default {
 
       signal?.throwIfAborted();
       inheritConfirmed(state, revision);
-      assertMode(state, revision.data, mode);
+      assertMode(state, revision.data, mode, explicit);
 
       const { data } = revision;
 
@@ -189,13 +199,15 @@ export default {
       }
 
       const raw = serializeForStorage(saved);
+      const expected = explicit !== undefined || !state.pristine ? explicit : state.version;
 
+      raw.version = randomUUIDv7();
       signal?.throwIfAborted();
 
       let result;
 
       try {
-        result = await yamb.storage.save(raw, { signal });
+        result = await yamb.storage.save(raw, { signal, expected });
       } catch (err) {
         reportError(yamb.onError, err, { op: 'save', uri });
         throw err;
@@ -214,6 +226,7 @@ export default {
       }
 
       yambState.byUri.set(uri, saved.id);
+      state.version = raw.version;
       confirm(state, revision, saved);
 
       return post;

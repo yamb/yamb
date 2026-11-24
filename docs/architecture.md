@@ -8,6 +8,8 @@ A Post separates its working data from the last confirmed save. A save captures 
 
 Save and remove share a queue per Post instance. Independently loaded instances have independent queues, so storage must enforce URI uniqueness and reject replacement of a missing ID. If an active write fails, the queue rejects waiting operations because the stored revision may be unknown. A subsequent save or remove can run.
 
+Storage is the only authority on the stored version. Core generates a fresh version for each write and sends the version the Post last confirmed as `expected`; the adapter compares and writes in one atomic step. A loaded Post therefore cannot overwrite or remove a revision it has not seen, and `blog.fence()` lets an application invalidate a write whose outcome it lost. Versions stay outside PostData, so hashes, rendering and preparation do not depend on them.
+
 ## Identity and lookup state
 
 Related links store stable IDs. A slug, status or publication date can change the URI. A successful write updates both lookup directions. The blog reads `[id, uri]` pairs from `storage.entries()` on open and [sync](../src/yamb/methods/sync.js). Sync collects a complete replacement before updating the maps, so a failed walk leaves the previous core lookup state intact.

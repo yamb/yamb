@@ -1,7 +1,7 @@
 import { StorageReadError, PostDateError, PostValidationError } from '../errors/index.js';
 import { getOptionsConfig } from '../options.js';
-import { IdSchema, InstantSchema, LinksSchema, PostSchema } from '../schemas/zod.js';
-import { setState } from './internal.js';
+import { IdSchema, InstantSchema, LinksSchema, PostSchema, VersionSchema } from '../schemas/zod.js';
+import { getState, setState } from './internal.js';
 import { validateField } from './lib/field.js';
 import { copyOwned, copyValue } from './lib/snapshot.js';
 import methods from './methods.js';
@@ -15,9 +15,21 @@ const StoredSchema = PostSchema.safeExtend({
 
 const descriptors = {};
 
+function storedVersion(raw) {
+  const version = raw.version ?? null;
+
+  if (version !== null && !VersionSchema.safeParse(version).success) {
+    throw new StorageReadError('corrupt stored post: invalid version', {
+      details: { id: raw.id, uri: raw.uri, field: 'version' }
+    });
+  }
+
+  return version;
+}
+
 function hydrate(raw, stored, optionsConfig) {
   for (const field of Reflect.ownKeys(raw)) {
-    if (!Object.hasOwn(descriptors, field)) {
+    if (!Object.hasOwn(descriptors, field) && !(stored && field === 'version')) {
       const ErrorClass = stored ? StorageReadError : PostValidationError;
 
       throw new ErrorClass('unknown post field', { details: { field } });
@@ -25,6 +37,8 @@ function hydrate(raw, stored, optionsConfig) {
   }
 
   const data = { ...raw };
+
+  delete data.version;
 
   for (const field of ['createdAt', 'updatedAt', 'publishedAt']) {
     if (data[field] !== undefined && !(data[field] instanceof Temporal.Instant)) {
@@ -80,9 +94,11 @@ export class Post {
   constructor(yamb, raw, { pristine = true } = {}) {
     const optionsConfig = getOptionsConfig(yamb);
     let data;
+    let version = null;
 
     try {
       data = hydrate(raw ?? {}, pristine, optionsConfig);
+      version = pristine ? storedVersion(raw ?? {}) : null;
     } catch (cause) {
       if (!pristine || cause instanceof StorageReadError) {
         throw cause;
@@ -99,6 +115,7 @@ export class Post {
       optionsConfig,
       data,
       pristine: pristine ? copyOwned(data) : null,
+      version,
       cache: {},
       touched: new Set()
     });
@@ -125,6 +142,14 @@ export class Post {
 
       descriptors[prop.name] = descriptor;
     }
+
+    Object.defineProperty(this.prototype, 'version', {
+      get() {
+        return getState(this).version;
+      },
+      enumerable: false,
+      configurable: false
+    });
 
     for (const method of methods) {
       Object.defineProperty(this.prototype, method.name, {

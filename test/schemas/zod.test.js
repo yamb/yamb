@@ -205,6 +205,7 @@ test('ConfigSchema rejects an invalid IANA time zone at config time, not later a
     all() {},
     save() {},
     remove() {},
+    fence() {},
     sync() {},
     close() {},
     entries() {}

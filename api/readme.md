@@ -27,6 +27,7 @@ Unknown configuration keys fail with `YAMB_CONFIG_INVALID`. `storage`, `renderer
 | `await blog.create(data, { signal }?)` | Build and insert a Post |
 | `await blog.find(id, { signal }?)` | Post or `null`, by stable ID |
 | `await blog.fetch(uriOrUrl, { signal }?)` | Post or `null`, by current URI. Accepts the same input as `blog.uri()`. |
+| `await blog.fence(id, expected, { signal }?)` | Replace only the stored [version](#versions) when it equals `expected`; return the new version |
 | `blog.uri(uriOrUrl)` | Trim whitespace and leading slashes from URI strings. Accept an absolute URL string or native `URL` and extract its same-origin path relative to base. |
 | `blog.locate(id)` | Indexed URI or `undefined` |
 | `blog.identify(uri)` | Indexed ID or `undefined` |
@@ -121,11 +122,11 @@ Field and object refinements remain authoritative. Coercion, transformation or s
 
 | Method | Behavior |
 | --- | --- |
-| `await post.save({ signal, mode }?)` | Save the revision captured at invocation; return Post |
-| `await post.publish({ signal }?)` | Set `published` and save |
-| `await post.schedule(when, { signal }?)` | Require a future instant, set `scheduled`/`publishedAt`, save |
-| `await post.archive({ signal }?)` | Set `archived` and save |
-| `await post.remove({ signal }?)` | Remove the confirmed stable ID after earlier queued operations |
+| `await post.save({ signal, mode, expected }?)` | Save the revision captured at invocation; return Post |
+| `await post.publish({ signal, expected }?)` | Set `published` and save |
+| `await post.schedule(when, { signal, expected }?)` | Require a future instant, set `scheduled`/`publishedAt`, save |
+| `await post.archive({ signal, expected }?)` | Set `archived` and save |
+| `await post.remove({ signal, expected }?)` | Remove the confirmed stable ID after earlier queued operations |
 | `post.changes()` | Independent changed top-level fields relative to the confirmed revision |
 | `post.hash()` | SHA-256 of canonical current `toJSON()` data. Object key order is ignored and array order is significant. |
 | `post.url(params?)` | Native `URL` for the current derived URI |
@@ -148,6 +149,40 @@ console.log(post.changes().title);
 Save fills missing status/text/tags/links, derives a missing slug, assigns creation/update times and stamps first publication when needed. A true no-op reads neither clock nor storage. Transitions are freeform and retain publication dates; a failed transition can leave the working status dirty. `changes()` omits automatic `updatedAt`; reverting a value removes its change. Hashes are memoized until mutation, and ordinary reads do not prepare content.
 
 `mode` is `'insert'`, `'update'` or absent. Insert rejects a supplied ID; update requires one. A build containing an unloaded ID requires explicit update mode. Storage updates never upsert missing records. New colliding drafts receive a suffix; other URI collisions fail. Stale related IDs remain visible to editors, but saving requires each ID in core's lookup index. Related changes do not change a referrer's hash automatically.
+
+### Versions
+
+Storage keeps a version string that every write replaces: insert, update and `blog.fence()`. `post.version` is the read-only, non-enumerable version this Post last loaded or confirmed; a write through another Post or a fence leaves it stale. It is `null` for an unsaved Post and for a record stored without a version. It is opaque: compare versions only for equality. It stays out of `toJSON()`, `hash()`, `changes()` and spread.
+
+Updates and removals of a loaded Post are conditional. They apply only while the stored version equals `post.version`, read when the operation starts after earlier queued operations. `expected` replaces that value with a version string or `null`, which matches a record without a version. A build with an unloaded ID in explicit update mode writes unconditionally unless `expected` is given. Insert rejects `expected`. A true no-op save neither checks nor changes the version.
+
+A mismatch rejects with `PostConflictError` (`YAMB_POST_CONFLICT`, details `{ id, expected }`) when the record exists and with `PostNotFoundError` when it does not; nothing is written in either case. The Post keeps its edits and previous version. Load it again with `blog.find(id)` to continue from the stored revision.
+
+When a write ends without a known outcome, fence the version that write expected. Read `post.version` while no other save or removal of that Post is pending, or pass the same value as `expected`; a queued write expects the version confirmed by the writes before it. Fence only uncertain failures, such as cancellation, `YAMB_STORAGE_WRITE` or an adapter connection error. Validation, URI, duplicate, not-found and conflict errors are definite and wrote nothing.
+
+```js
+const previous = post.version;
+
+try {
+  await post.save({ signal, expected: previous });
+} catch (error) {
+  if (!signal.aborted && error.code !== 'YAMB_STORAGE_WRITE') {
+    throw error;
+  }
+
+  try {
+    await blog.fence(post.id, previous);
+  } catch (miss) {
+    if (miss.code !== 'YAMB_POST_CONFLICT' && miss.code !== 'YAMB_POST_NOT_FOUND') {
+      throw miss;
+    }
+  }
+
+  const current = await blog.find(post.id);
+}
+```
+
+A successful fence makes every pending write that expects `previous` inapplicable. A conflict or a missing record means another write, possibly the uncertain one, already won. Either result settles the outcome.
 
 ## Collections
 
@@ -191,13 +226,14 @@ Adapters import errors from `yamb/errors` and optional schemas/`encodeInstant` f
 | `find(id, { signal }?)`, `fetch(uri, { signal }?)` | Independent RawPost or `null` |
 | `all(query?, selection?)` | Lazy iterable/async iterable of independent RawPost; one cursor per traversal |
 | `count(query?, { signal }?)` | Matching total before pagination |
-| `save(raw, { signal }?)` | Insert without ID; otherwise replace an existing record; return at least `{ id }` |
-| `remove(id, { signal }?)` | Delete by ID; reject a missing record |
+| `save(raw, { signal, expected }?)` | Insert without ID; otherwise replace an existing record; return at least `{ id }` |
+| `remove(id, { signal, expected }?)` | Delete by ID; reject a missing record |
+| `fence(id, version, { signal, expected })` | Set only the stored version |
 | `entries({ signal }?)` | Iterable or async iterable of `[id, uri]` pairs for all stored posts |
 | `sync({ signal }?)` | Refresh adapter state |
 | `close(options?)` | Release owned resources, including partial acquisition |
 
-RawPost uses public fields as plain independent data, string related IDs and UTC ISO date strings. `encodeInstant` emits nine fractional digits for chronological lexical ordering; Post `toJSON()` emits display ISO strings without fixed trailing precision. Omit `undefined` fields. Retained input and returned output must not alias mutable stored data.
+RawPost uses public fields as plain independent data, string related IDs and UTC ISO date strings, plus an optional top-level `version` string. Core generates every version and passes it as `raw.version` or the `fence` argument; store it unchanged. When `expected` is `undefined`, the write is unconditional. Otherwise it applies only if the stored version equals `expected`, where `null` matches a missing version, and the comparison and write are one atomic step. A mismatch rejects with `PostNotFoundError` when the record is absent and `PostConflictError` otherwise; a follow-up read may choose between them. `encodeInstant` emits nine fractional digits for chronological lexical ordering; Post `toJSON()` emits display ISO strings without fixed trailing precision. Omit `undefined` fields. Retained input and returned output must not alias mutable stored data.
 
 Core uses `storage.entries()` to build its lookups on open and sync.
 
@@ -288,4 +324,4 @@ For cached preparation, build the key from the same source snapshot passed to `p
 
 `url` returns a native URL using base's pathname as a directory prefix, even without a trailing slash. Absolute/root-relative inputs retain native semantics; params set string query values. Input/base URL objects remain unchanged.
 
-Domain errors carry `code`, optional `cause` and `details`. Error classes derive from `YambError` and are named after their subject: `YambConfigError`, `YambNotOpenError`, `PostValidationError`, `PostDateError`, `PostStatusError`, `PostNotFoundError`, `UriOriginError`, `UriTakenError`, `QueryValidationError`, `LinkRefNotFoundError`, `StorageNotOpenError`, `StorageReadError`, `StorageWriteError`, `StorageDuplicateError`, `RendererMissingError`, `RendererScopeError`, `RendererInputError`, `RendererFailedError`. Codes use `YAMB_` prefixes; date/status/config/origin codes are `YAMB_POST_DATE_INVALID`, `YAMB_POST_STATUS_INVALID`, `YAMB_CONFIG_INVALID`, `YAMB_URI_ORIGIN_MISMATCH`. Native cancellation reasons need not be Error objects.
+Domain errors carry `code`, optional `cause` and `details`. Error classes derive from `YambError` and are named after their subject: `YambConfigError`, `YambNotOpenError`, `PostValidationError`, `PostDateError`, `PostStatusError`, `PostNotFoundError`, `PostConflictError`, `UriOriginError`, `UriTakenError`, `QueryValidationError`, `LinkRefNotFoundError`, `StorageNotOpenError`, `StorageReadError`, `StorageWriteError`, `StorageDuplicateError`, `RendererMissingError`, `RendererScopeError`, `RendererInputError`, `RendererFailedError`. Codes use `YAMB_` prefixes; date/status/config/origin/conflict codes are `YAMB_POST_DATE_INVALID`, `YAMB_POST_STATUS_INVALID`, `YAMB_CONFIG_INVALID`, `YAMB_URI_ORIGIN_MISMATCH`, `YAMB_POST_CONFLICT`. Native cancellation reasons need not be Error objects.

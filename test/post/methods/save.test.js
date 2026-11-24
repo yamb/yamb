@@ -19,6 +19,7 @@ function makeStorage() {
       return { id: 'generated-id-1' };
     },
     remove: async () => {},
+    fence: async () => {},
     sync: async () => {},
     close: async () => {},
     _calls: calls
@@ -364,7 +365,8 @@ test('save id remains stable on second save', async () => {
 
       return { id: callCount === 1 ? 'stable-id' : undefined };
     },
-    remove: async () => {}
+    remove: async () => {},
+    fence: async () => {}
   };
 
   const post = makePost({
@@ -412,7 +414,8 @@ test('rename: save updates byId to new uri; id stable', async () => {
     find: async () => null,
     fetch: async () => null,
     save: async (data) => ({ id: data.id ?? 'rename-id' }),
-    remove: async () => {}
+    remove: async () => {},
+    fence: async () => {}
   };
 
   const pristine = {
@@ -475,7 +478,8 @@ test('remove deletes by id and clears byId entry', async () => {
     find: async () => null,
     fetch: async () => null,
     save: async () => ({ id: 'del-id' }),
-    remove: async (id, opts) => removeCalls.push({ id, opts })
+    remove: async (id, opts) => removeCalls.push({ id, opts }),
+    fence: async () => {}
   };
 
   const pristine = {

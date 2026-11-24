@@ -25,7 +25,8 @@ function makePost(initialStatus = 'draft') {
 
         return { id: 'test-id' };
       },
-      remove: async (id, options) => calls.push({ kind: 'remove', id, options })
+      remove: async (id, options) => calls.push({ kind: 'remove', id, options }),
+      fence: async () => {}
     },
     clock: () => NOW,
     slugger: (t) => t.toLowerCase()

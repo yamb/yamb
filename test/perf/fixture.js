@@ -1,5 +1,5 @@
 import { yamb } from 'yamb';
-import { PostNotFoundError, StorageDuplicateError } from 'yamb/errors';
+import { PostConflictError, PostNotFoundError, StorageDuplicateError } from 'yamb/errors';
 
 export function postData(bytes = 1024, index = 0) {
   const paragraph = `# Yamb baseline
@@ -27,6 +27,20 @@ export function storageWith(rows = []) {
   const uris = new Map(rows.map((row) => [row.uri, row.id]));
   let sequence = records.size;
 
+  function claim(id, expected) {
+    const row = records.get(id);
+
+    if (!row) {
+      throw new PostNotFoundError();
+    }
+
+    if (expected !== undefined && (row.version ?? null) !== expected) {
+      throw new PostConflictError();
+    }
+
+    return row;
+  }
+
   return {
     async open() {},
     async close() {},
@@ -37,14 +51,10 @@ export function storageWith(rows = []) {
     async fetch(uri) {
       return this.find(uris.get(uri));
     },
-    async save(raw, { signal } = {}) {
+    async save(raw, { signal, expected } = {}) {
       signal?.throwIfAborted();
 
-      const previous = records.get(raw.id);
-
-      if (raw.id && !previous) {
-        throw new PostNotFoundError();
-      }
+      const previous = raw.id ? claim(raw.id, expected) : undefined;
 
       if (uris.has(raw.uri) && uris.get(raw.uri) !== raw.id) {
         throw new StorageDuplicateError();
@@ -61,17 +71,17 @@ export function storageWith(rows = []) {
       uris.set(raw.uri, id);
       return { id };
     },
-    async remove(id, { signal } = {}) {
+    async remove(id, { signal, expected } = {}) {
       signal?.throwIfAborted();
 
-      const row = records.get(id);
-
-      if (!row) {
-        throw new PostNotFoundError();
-      }
+      const row = claim(id, expected);
 
       uris.delete(row.uri);
       records.delete(id);
+    },
+    async fence(id, version, { signal, expected } = {}) {
+      signal?.throwIfAborted();
+      claim(id, expected).version = version;
     },
     async *entries() {
       for (const { id, uri } of records.values()) {
