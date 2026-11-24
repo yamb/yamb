@@ -27,6 +27,8 @@ jobs:
       commit: ${{ steps.package.outputs.commit }}
       digest: ${{ steps.package.outputs.digest }}
       asset: ${{ steps.package.outputs.asset }}
+      npm_asset: ${{ steps.package.outputs.npm_asset }}
+      npm_digest: ${{ steps.package.outputs.npm_digest }}
       artifact: ${{ steps.package.outputs.artifact }}
     steps:
       - name: Checkout
@@ -43,7 +45,7 @@ jobs:
         run: |
           test "$PROTECTED" = true
           [[ "$GITHUB_REF_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
-          test "$(jq -er '.name + "@" + .version' package.json)" = "@yamb/core@${GITHUB_REF_NAME#v}"
+          test "$(jq -er '.name + "@" + .version' package.json)" = "yamb@${GITHUB_REF_NAME#v}"
           test "$(git rev-parse HEAD)" = "$(git rev-parse "$GITHUB_SHA^{commit}")"
           git merge-base --is-ancestor HEAD "refs/remotes/origin/$BRANCH"
 
@@ -81,12 +83,14 @@ jobs:
           git diff --exit-code HEAD
           version="$(jq -er .version package.json)"
           asset="yamb-core-$version.tgz"
-          mkdir -p "$RUNNER_TEMP/release"
-          bash scripts/pack.sh "$RUNNER_TEMP/release/$asset"
+          npm_asset="npm-yamb-$version.tgz"
+          bash scripts/pack.sh "$RUNNER_TEMP/release"
           {
             echo "commit=$(git rev-parse HEAD)"
             echo "digest=sha256:$(sha256sum "$RUNNER_TEMP/release/$asset" | cut -d ' ' -f 1)"
             echo "asset=$asset"
+            echo "npm_asset=$npm_asset"
+            echo "npm_digest=sha256:$(sha256sum "$RUNNER_TEMP/release/$npm_asset" | cut -d ' ' -f 1)"
             echo "artifact=package-$GITHUB_RUN_ATTEMPT"
           } >> "$GITHUB_OUTPUT"
 
@@ -94,9 +98,13 @@ jobs:
         env:
           ASSET: ${{ steps.package.outputs.asset }}
           DIGEST: ${{ steps.package.outputs.digest }}
+          NPM_ASSET: ${{ steps.package.outputs.npm_asset }}
         run: |
           archive="$RUNNER_TEMP/release/$ASSET"
+          npm_archive="$RUNNER_TEMP/release/$NPM_ASSET"
+          pnpm exec bash scripts/smoke.sh "$npm_archive"
           pnpm exec bash scripts/smoke.sh "$archive"
+          pnpm publish "$npm_archive" --registry=https://registry.npmjs.org/ --access public --no-git-checks --ignore-scripts --dry-run
           pnpm exec node scripts/publish.mjs "$archive" "$DIGEST" --dry-run
           test "sha256:$(sha256sum "$archive" | cut -d ' ' -f 1)" = "$DIGEST"
 
@@ -105,7 +113,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ steps.package.outputs.artifact }}
-          path: ${{ runner.temp }}/release/${{ steps.package.outputs.asset }}
+          path: ${{ runner.temp }}/release/*.tgz
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
@@ -123,6 +131,8 @@ jobs:
     env:
       ASSET: ${{ needs.gates.outputs.asset }}
       DIGEST: ${{ needs.gates.outputs.digest }}
+      NPM_ASSET: ${{ needs.gates.outputs.npm_asset }}
+      NPM_DIGEST: ${{ needs.gates.outputs.npm_digest }}
     steps:
       - name: Download
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -131,12 +141,14 @@ jobs:
           path: ${{ runner.temp }}/release
 
       - name: Verify
-        run: test "sha256:$(sha256sum "$RUNNER_TEMP/release/$ASSET" | cut -d ' ' -f 1)" = "$DIGEST"
+        run: |
+          test "sha256:$(sha256sum "$RUNNER_TEMP/release/$ASSET" | cut -d ' ' -f 1)" = "$DIGEST"
+          test "sha256:$(sha256sum "$RUNNER_TEMP/release/$NPM_ASSET" | cut -d ' ' -f 1)" = "$NPM_DIGEST"
 
       - name: Attest
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-path: ${{ runner.temp }}/release/${{ needs.gates.outputs.asset }}
+          subject-path: ${{ runner.temp }}/release/*.tgz
 
   release:
     name: Release
@@ -157,6 +169,8 @@ jobs:
       BRANCH: ${{ github.event.repository.default_branch }}
       COMMIT: ${{ needs.gates.outputs.commit }}
       DIGEST: ${{ needs.gates.outputs.digest }}
+      NPM_ASSET: ${{ needs.gates.outputs.npm_asset }}
+      NPM_DIGEST: ${{ needs.gates.outputs.npm_digest }}
       GH_REPO: yamb/yamb
       REF: ${{ github.ref_name }}
     steps:
@@ -188,14 +202,16 @@ jobs:
       - name: Verify
         run: |
           test "$(git rev-parse HEAD)" = "$COMMIT"
+          test "$NPM_ASSET" = "npm-yamb-${REF#v}.tgz"
+          test "sha256:$(sha256sum "$RUNNER_TEMP/release/$NPM_ASSET" | cut -d ' ' -f 1)" = "$NPM_DIGEST"
           test "$ASSET" = "yamb-core-${REF#v}.tgz"
-          test "$(jq -er '.name + "@" + .version' package.json)" = "@yamb/core@${REF#v}"
+          test "$(jq -er '.name + "@" + .version' package.json)" = "yamb@${REF#v}"
           test "sha256:$(sha256sum "$RUNNER_TEMP/release/$ASSET" | cut -d ' ' -f 1)" = "$DIGEST"
 
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash scripts/release.sh "$RUNNER_TEMP/release/$ASSET"
+        run: bash scripts/release.sh "$RUNNER_TEMP/release"
 
       - name: Publish
         env:
@@ -203,3 +219,15 @@ jobs:
           PNPM_CONFIG__AUTH: |
             {"https://npm.pkg.github.com": {"@yamb": {"authToken": ${{ toJSON(github.token) }}}}}
         run: node scripts/publish.mjs "$RUNNER_TEMP/release/$ASSET" "$DIGEST"
+
+      - name: Handoff
+        run: |
+          {
+            echo '### Publish to npm'
+            echo
+            echo '```sh'
+            echo "gh release download $REF --repo $GH_REPO --pattern $NPM_ASSET &&"
+            echo "  gh release verify-asset $REF $NPM_ASSET --repo $GH_REPO &&"
+            echo "  pnpm publish ./$NPM_ASSET --registry=https://registry.npmjs.org/ --access public --no-git-checks --ignore-scripts"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

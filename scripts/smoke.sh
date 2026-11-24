@@ -26,5 +26,10 @@ for (const name of Object.keys(dependencies)) {
   await symlink(installed, target, 'dir');
 }
 
+if (pkg.name !== 'yamb') {
+  await mkdir(join(root, 'node_modules'), { recursive: true });
+  await symlink(root, join(root, 'node_modules', 'yamb'), 'dir');
+}
+
 await import(pathToFileURL(join(root, 'smoke.mjs')));
 JS
