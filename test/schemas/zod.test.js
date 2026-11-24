@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  AuthorSchema,
+  SocialSchema,
   UriSchema,
   SlugSchema,
   TagSchema,
@@ -87,6 +89,18 @@ test('CoverSchema accepts http and relative', () => {
   });
   assert.deepEqual(CoverSchema.parse({ url: '/covers/x.jpg' }), { url: '/covers/x.jpg' });
   assert.deepEqual(CoverSchema.parse({ url: './local.jpg' }), { url: './local.jpg' });
+});
+
+test('AuthorSchema and CoverSchema accept absolute URLs on local hosts', () => {
+  for (const url of ['http://localhost:3000/about', 'http://127.0.0.1/a', 'http://[::1]/a']) {
+    assert.equal(AuthorSchema.parse({ name: 'A', url }).url, url);
+    assert.deepEqual(CoverSchema.parse({ url }), { url });
+    assert.equal(SocialSchema.parse({ image: url }).image, url);
+  }
+});
+
+test('AuthorSchema rejects URLs with credentials', () => {
+  assert.throws(() => AuthorSchema.parse({ name: 'A', url: 'https://user:pass@example.com/' }));
 });
 
 test('CoverSchema rejects javascript: and data:', () => {

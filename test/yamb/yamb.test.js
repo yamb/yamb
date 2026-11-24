@@ -33,6 +33,41 @@ test('yamb() default base is http://localhost', () => {
   assert.ok(blog);
 });
 
+test('yamb() accepts an absolute HTTP(S) base on any host', () => {
+  for (const base of [
+    'http://localhost',
+    'http://localhost:3000/blog',
+    'http://127.0.0.1:3004/blog',
+    'http://[::1]:3000/',
+    'http://intranet/blog',
+    'https://example.com/blog'
+  ]) {
+    assert.doesNotThrow(() => yamb({ storage: makeStorage(), base }), base);
+  }
+});
+
+test('yamb() trims whitespace around base', () => {
+  const blog = yamb({ storage: makeStorage(), base: ' http://localhost:3000/blog\n' });
+  assert.equal(String(blog.base), 'http://localhost:3000/blog');
+});
+
+test('yamb() rejects a base with credentials, another scheme or no host', () => {
+  for (const base of [
+    'https://user:pass@example.com/blog',
+    'http://user@example.com/',
+    'ftp://example.com/',
+    '/blog',
+    'http:example.com',
+    'http://exa mple.com/'
+  ]) {
+    assert.throws(
+      () => yamb({ storage: makeStorage(), base }),
+      { code: 'YAMB_CONFIG_INVALID' },
+      base
+    );
+  }
+});
+
 test('blog.open() and blog.close() are idempotent', async () => {
   const blog = yamb({ storage: makeStorage() });
   await blog.open();

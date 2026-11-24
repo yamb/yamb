@@ -9,7 +9,7 @@ Use this reference to configure a blog, edit and query posts, or implement stora
 | `storage` | Adapter implementing the [storage interface](#storage) | Required |
 | `renderers` | Map of format names to [renderers](#renderers) | `{}` |
 | `options` | Synchronous Zod object schema for application data | Empty strict object |
-| `base` | HTTP(S) blog URL, resolved as a directory | `http://localhost` |
+| `base` | Absolute HTTP(S) blog URL without credentials, resolved as a directory; any host, including `localhost` and IP addresses | `http://localhost` |
 | `timeZone` | IANA time zone for dated URIs | `UTC` |
 | `signal` | Global `AbortSignal` | Absent |
 | `clock` | Function returning an instant, ISO string or `Date` | `Temporal.Now.instant()` |
@@ -63,7 +63,7 @@ Public fields are own enumerable properties. `Object.keys`, `Object.entries` and
 | `createdAt`, `updatedAt`, `publishedAt` | `Temporal.Instant`; assignment accepts an instant, ISO string or `Date` in years 0001–9999 |
 | `options` | Application [options](#options), default `{}` |
 
-Author URLs and social images accept `''`, HTTP(S), or valid references starting with `/` or `./`. `text` includes any introduction; `preview` is never generated from text or metadata. Content interpretation belongs to explicit [preparation](#transformations).
+Author URLs and social images accept `''`, absolute HTTP(S) URLs without credentials, or valid references starting with `/` or `./`. `text` includes any introduction; `preview` is never generated from text or metadata. Content interpretation belongs to explicit [preparation](#transformations).
 
 Whole-field assignments own their input. Nested objects/arrays remain live and validate synchronously; invalid edits roll back atomically. Array mutators validate one complete candidate. Borrowed array mutators and `Object.assign` perform sequential writes, so an earlier successful write remains if a later one fails. Optional fields clear with `undefined`; initialize an absent object before editing its children. Detached references cannot mutate a replacement.
 
