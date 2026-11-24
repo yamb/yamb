@@ -11,14 +11,14 @@ For GitHub Packages, route the `@yamb` scope to `https://npm.pkg.github.com` and
 Requires Node.js 26.13 or later. Install core and [file storage](https://github.com/yamb/storage-files).
 
 ```bash
-pnpm add yamb @meritt/yamb-storage-files
+pnpm add yamb yamb-storage-files
 ```
 
 Use a trusted directory for `./posts`.
 
 ```js
-import { files } from '@meritt/yamb-storage-files';
 import { yamb } from 'yamb';
+import { files } from 'yamb-storage-files';
 
 await using blog = yamb({
   storage: files({
