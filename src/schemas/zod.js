@@ -14,6 +14,11 @@ export const IdSchema = z
   .min(1, 'id must not be empty')
   .max(64, 'id must be 64 chars or less');
 
+export const VersionSchema = z
+  .string()
+  .min(1, 'version must not be empty')
+  .max(64, 'version must be 64 chars or less');
+
 export const SlugSchema = z
   .string()
   .regex(/^[a-z0-9-]+$/, 'slug must be lowercase letters, digits, dashes')
@@ -260,12 +265,13 @@ const StorageContract = z.custom(
     typeof storage.count === 'function' &&
     typeof storage.save === 'function' &&
     typeof storage.remove === 'function' &&
+    typeof storage.fence === 'function' &&
     typeof storage.sync === 'function' &&
     typeof storage.close === 'function' &&
     typeof storage.entries === 'function',
   {
     message:
-      'storage must implement contract (open/find/fetch/all/count/save/remove/sync/close/entries)'
+      'storage must implement contract (open/find/fetch/all/count/save/remove/fence/sync/close/entries)'
   }
 );
 

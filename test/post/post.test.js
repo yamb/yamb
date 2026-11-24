@@ -10,7 +10,8 @@ const makeYamb = () => ({
   storage: {
     find: async () => null,
     save: async () => {},
-    remove: async () => {}
+    remove: async () => {},
+    fence: async () => {}
   },
   renderers: {},
   clock: () => Temporal.Instant.from('2026-04-26T10:00:00Z'),

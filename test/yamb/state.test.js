@@ -27,6 +27,7 @@ const fakeStorage = {
   },
 
   remove() {},
+  fence() {},
 
   sync() {},
 

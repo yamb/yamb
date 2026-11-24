@@ -12,6 +12,7 @@ function makeStorage() {
     all: () => ({ async *[Symbol.asyncIterator]() {} }),
     save: async () => {},
     remove: async () => {},
+    fence: async () => {},
     sync: async () => {},
     close: async () => {},
 

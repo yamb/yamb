@@ -34,6 +34,7 @@ test('close() releases storage even when the global signal is already aborted', 
     all() {},
     save() {},
     remove() {},
+    fence() {},
     sync() {}
   };
 
@@ -66,6 +67,7 @@ test('open() rolls back storage when storage.open() throws', async () => {
     all() {},
     save() {},
     remove() {},
+    fence() {},
     sync() {}
   };
 
@@ -103,7 +105,8 @@ test('sync() leaves the index intact when the rebuild walk fails (rebuilds into 
     },
     all() {},
     save() {},
-    remove() {}
+    remove() {},
+    fence() {}
   };
 
   const blog = yamb({ storage });
@@ -143,6 +146,7 @@ test('close() completes even when both a renderer dispose() and the onError hook
     all() {},
     save() {},
     remove() {},
+    fence() {},
     sync() {}
   };
   const renderer = {
@@ -180,6 +184,7 @@ test('onError receives op context on a save failure and the original error rethr
     find() {},
     all() {},
     remove() {},
+    fence() {},
     sync() {},
     save() {
       throw new Error('write boom');

@@ -101,7 +101,7 @@ for (const operation of ['save', 'remove']) {
 
     const owner = await blog.create({ title: 'New owner', slug: 'original' });
     stale.slug = 'latest';
-    await stale[operation]();
+    await stale[operation]({ expected: loaded.version });
 
     await check(blog, owner.id, 'drafts/original');
     await absent(blog, 'drafts/middle');
@@ -175,7 +175,7 @@ for (const operation of ['save', 'remove']) {
 
       stale.slug = 'latest';
       const controller = new AbortController();
-      const pending = stale[operation]({ signal: controller.signal });
+      const pending = stale[operation]({ signal: controller.signal, expected: loaded.version });
 
       await entered.promise;
 
@@ -217,12 +217,12 @@ for (const operation of ['save', 'remove']) {
     const release = Promise.withResolvers();
     const original = blog.storage[operation].bind(blog.storage);
 
-    blog.storage[operation] = async (...args) => {
+    blog.storage[operation] = async (input, options) => {
       blog.storage[operation] = original;
       entered.resolve();
       await release.promise;
 
-      return original(...args);
+      return original(input, { ...options, expected: undefined });
     };
 
     post.slug = 'latest';

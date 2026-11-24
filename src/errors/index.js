@@ -2,6 +2,7 @@ export { YambError } from './base.js';
 export { YambConfigError } from './yamb-config.js';
 export { YambNotOpenError } from './yamb-not-open.js';
 export { PostNotFoundError } from './post-not-found.js';
+export { PostConflictError } from './post-conflict.js';
 export { PostValidationError } from './post-validation.js';
 export { PostDateError } from './post-date.js';
 export { PostStatusError } from './post-status.js';
