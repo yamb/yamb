@@ -1,6 +1,7 @@
-import { QueryValidationError, YambNotOpenError } from '../../errors/index.js';
+import { QueryValidationError } from '../../errors/index.js';
+import { parse } from '../../schemas/parse.js';
 import { IdSchema } from '../../schemas/zod.js';
-import { effectiveSignal } from '../../signal.js';
+import { begin } from '../../signal.js';
 import { getState } from '../internal.js';
 
 export default {
@@ -8,29 +9,11 @@ export default {
 
   async fn(yamb, id, options = {}) {
     const state = getState(yamb);
+    const signal = begin(yamb, options);
+    const raw = await state.storage.find(parse(IdSchema, id, QueryValidationError, 'id'), {
+      signal
+    });
 
-    if (!state.isOpen) {
-      throw new YambNotOpenError();
-    }
-
-    const result = IdSchema.safeParse(id);
-
-    if (!result.success) {
-      throw new QueryValidationError('find requires a valid id (non-empty string, max 64 chars)', {
-        details: { issues: result.error.issues }
-      });
-    }
-
-    const signal = effectiveSignal(yamb, options);
-
-    signal?.throwIfAborted();
-
-    const raw = await state.storage.find(result.data, { signal });
-
-    if (!raw) {
-      return null;
-    }
-
-    return state._hydrate(raw);
+    return raw ? state._hydrate(raw) : null;
   }
 };

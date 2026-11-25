@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getState, setState } from '../../../src/yamb/internal.js';
+import { setState } from '../../../src/yamb/internal.js';
 import find from '../../../src/yamb/methods/find.js';
 
 function makeYamb({ storageFind = async () => null } = {}) {
-  const yamb = {};
+  const yamb = { isOpen: true };
 
   const storage = {
     find: storageFind
@@ -40,7 +40,7 @@ test('find(unknownId) returns null', async () => {
 
 test('find throws YambNotOpenError when not open', async () => {
   const yamb = makeYamb();
-  getState(yamb).isOpen = false;
+  yamb.isOpen = false;
   await assert.rejects(() => find.fn(yamb, 'any'), { code: 'YAMB_NOT_OPEN' });
 });
 

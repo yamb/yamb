@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { YambError } from '../../src/errors/base.js';
+import { YambError } from '../../src/errors/index.js';
 
 test('YambError sets name from constructor', () => {
   class Custom extends YambError {

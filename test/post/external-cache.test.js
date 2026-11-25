@@ -122,12 +122,8 @@ test('export cache distinguishes JSON values and escaped text without ambiguous 
   assert.strictEqual(exported(post, cache), results[0]);
 });
 
-test('invalid unfinished builds cannot reuse a valid export through lossy JSON encoding', async (t) => {
+test('build rejects values that JSON encoding would make lossy', async (t) => {
   const blog = await setup(t);
-  const cache = new Map();
-  const empty = blog.build({});
-  const partial = exported(empty, cache);
-  const valid = exported(blog.build({ title: 'Guide' }), cache);
   for (const data of [
     { title: NaN },
     { text: Infinity },
@@ -135,11 +131,8 @@ test('invalid unfinished builds cannot reuse a valid export through lossy JSON e
     { meta: { keywords: [undefined] } },
     { meta: { title: Temporal.Instant.from('2026-11-10T09:00:00Z') } }
   ]) {
-    const post = blog.build(data);
-    assert.throws(() => exported(post, cache), { code: 'YAMB_POST_VALIDATION' });
-    assert.strictEqual(exported(empty, cache), partial);
+    assert.throws(() => blog.build(data), { code: 'YAMB_POST_VALIDATION' });
   }
-  assert.strictEqual(exported(blog.build({ title: 'Guide' }), cache), valid);
 });
 
 test('exports refresh for scalar, optional, related ID and date edits', async (t) => {

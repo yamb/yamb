@@ -1,7 +1,8 @@
 import { YambNotOpenError } from '../../errors/index.js';
 import { reportError } from '../../report-error.js';
-import { effectiveSignal } from '../../signal.js';
+import { begin } from '../../signal.js';
 import { getState as getYambState } from '../../yamb/internal.js';
+import { record } from '../../yamb/lookups.js';
 import { getState } from '../internal.js';
 import { enqueueOperation } from '../lib/operations.js';
 import { expectedVersion } from '../lib/version.js';
@@ -12,18 +13,12 @@ export default {
   async fn(post, options = {}) {
     const state = getState(post);
     const { yamb } = state;
-    const signal = effectiveSignal(yamb, options);
+    const signal = begin(yamb, options);
     const explicit = expectedVersion(options);
-
-    if (!yamb.isOpen) {
-      throw new YambNotOpenError();
-    }
-
-    signal?.throwIfAborted();
 
     return enqueueOperation(state, signal, async () => {
       if (!yamb.isOpen) {
-        throw new YambNotOpenError();
+        throw new YambNotOpenError('yamb instance is not open');
       }
 
       signal?.throwIfAborted();
@@ -44,15 +39,7 @@ export default {
         throw err;
       }
 
-      const yambState = getYambState(yamb);
-      const confirmed = yambState.byId.get(id);
-
-      yambState.byId.delete(id);
-
-      if (yambState.byUri.get(confirmed) === id) {
-        yambState.byUri.delete(confirmed);
-      }
-
+      record(getYambState(yamb), id, null);
       state.removed = true;
       state.pristine = null;
       state.confirmedRevisions = undefined;

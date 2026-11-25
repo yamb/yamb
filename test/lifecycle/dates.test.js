@@ -112,18 +112,15 @@ test('archived (never published) → published sets publishedAt to now', () => {
   assert.equal(data.publishedAt?.toString(), '2026-05-02T10:00:00Z');
 });
 
-test('clock returning a Date decodes to a Temporal.Instant on publish', () => {
-  const data = { status: Status.Published, title: 'X' };
-  applySaveLifecycle(data, () => new Date('2026-04-26T10:00:00.000Z'));
-  assert.ok(data.publishedAt instanceof Temporal.Instant, 'publishedAt must be a Temporal.Instant');
-  assert.equal(data.publishedAt.toString(), '2026-04-26T10:00:00Z');
-  assert.ok(data.createdAt instanceof Temporal.Instant);
-  assert.ok(data.updatedAt instanceof Temporal.Instant);
-});
-
-test('clock returning a value InstantSchema cannot decode throws a typed PostDateError', () => {
-  const data = { status: Status.Draft, title: 'X' };
-  assert.throws(() => applySaveLifecycle(data, () => 'not-a-real-instant'), {
-    code: 'YAMB_POST_DATE_INVALID'
+for (const value of [
+  '2026-04-26T10:00:00Z',
+  'not-a-real-instant',
+  Temporal.Instant.from('+010000-01-01T00:00:00Z')
+]) {
+  test(`clock returning ${value} throws a typed PostDateError`, () => {
+    const data = { status: Status.Published, title: 'X' };
+    assert.throws(() => applySaveLifecycle(data, () => value), {
+      code: 'YAMB_POST_DATE_INVALID'
+    });
   });
-});
+}

@@ -1,5 +1,7 @@
 import { types } from 'node:util';
 
+import { isCancellation, TransformError } from './errors/index.js';
+
 function record(value) {
   if (value === null || typeof value !== 'object') {
     return false;
@@ -116,20 +118,14 @@ export async function transform(value, stages, ctx = {}) {
     try {
       result = await stage.transform(result, ctx);
     } catch (cause) {
-      if (ctx.signal?.aborted && Object.is(cause, ctx.signal.reason)) {
+      if (isCancellation(cause, ctx.signal)) {
         throw cause;
       }
 
-      if (cause?.name === 'AbortError') {
-        throw cause;
-      }
-
-      const error = new Error(`transformer "${stage.name}" failed`, { cause });
-      error.name = 'TransformError';
-      error.code = 'YAMB_TRANSFORM_FAILED';
-      error.stage = stage.name;
-
-      throw error;
+      throw new TransformError(`transformer "${stage.name}" failed`, {
+        cause,
+        details: { stage: stage.name }
+      });
     }
 
     ctx.signal?.throwIfAborted();

@@ -1,5 +1,3 @@
-import { closeIterator } from './close.js';
-
 export async function* mapAsync(source, fn) {
   let i = 0;
 
@@ -19,32 +17,30 @@ export async function* filterAsync(source, fn) {
 }
 
 export async function* takeAsync(source, n) {
-  if (n <= 0) {
+  if (n === 0) {
     return;
   }
 
-  let i = 0;
+  let left = n;
 
   for await (const v of source) {
     yield v;
-    i += 1;
 
-    if (i >= n) {
+    if (--left === 0) {
       return;
     }
   }
 }
 
 export async function* dropAsync(source, n) {
-  let i = 0;
+  let skipped = 0;
 
   for await (const v of source) {
-    if (i < n) {
-      i += 1;
-      continue;
+    if (skipped < n) {
+      skipped += 1;
+    } else {
+      yield v;
     }
-
-    yield v;
   }
 }
 
@@ -54,35 +50,15 @@ export async function* flatMapAsync(source, fn) {
   for await (const v of source) {
     const inner = await fn(v, i++);
 
-    if (inner == null) {
+    if (
+      typeof inner?.[Symbol.asyncIterator] !== 'function' &&
+      typeof inner?.[Symbol.iterator] !== 'function'
+    ) {
       throw new TypeError('flatMap: function must return an iterable or async iterable');
     }
 
-    if (typeof inner[Symbol.asyncIterator] === 'function') {
-      yield* inner;
-      continue;
-    }
-
-    if (typeof inner[Symbol.iterator] === 'function') {
-      for (const x of inner) {
-        yield x;
-      }
-
-      continue;
-    }
-
-    throw new TypeError('flatMap: function must return an iterable or async iterable');
+    yield* inner;
   }
-}
-
-export async function toArrayAsync(source) {
-  const out = [];
-
-  for await (const v of source) {
-    out.push(v);
-  }
-
-  return out;
 }
 
 export async function forEachAsync(source, fn) {
@@ -93,41 +69,27 @@ export async function forEachAsync(source, fn) {
   }
 }
 
-export async function reduceAsync(source, reducer, ...rest) {
-  const iter = source[Symbol.asyncIterator]();
-  let acc;
+export async function reduceAsync(source, reducer, ...initial) {
+  let seeded = initial.length > 0;
+  let acc = initial[0];
   let i = 0;
-  let failed = false;
 
-  try {
-    if (rest.length > 0) {
-      acc = rest[0];
+  for await (const v of source) {
+    if (seeded) {
+      acc = await reducer(acc, v, i);
     } else {
-      const first = await iter.next();
-
-      if (first.done) {
-        throw new TypeError('reduce of empty async iterator with no initial value');
-      }
-
-      acc = first.value;
-      i = 1;
+      acc = v;
+      seeded = true;
     }
 
-    while (true) {
-      const { value, done } = await iter.next();
-
-      if (done) {
-        return acc;
-      }
-
-      acc = await reducer(acc, value, i++);
-    }
-  } catch (error) {
-    failed = true;
-    throw error;
-  } finally {
-    await closeIterator(iter, { preserveError: failed });
+    i += 1;
   }
+
+  if (!seeded) {
+    throw new TypeError('reduce of empty async iterator with no initial value');
+  }
+
+  return acc;
 }
 
 export async function someAsync(source, fn) {

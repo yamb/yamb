@@ -18,6 +18,7 @@ function makePost({ relatedIds = [], yamb }) {
 
 function makeYamb({ store = {}, signal = undefined, findCalls = null }) {
   return {
+    isOpen: true,
     signal,
     storage: {
       async find(id, options) {

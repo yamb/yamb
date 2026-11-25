@@ -1,21 +1,19 @@
+import { YambNotOpenError } from './errors/index.js';
+
 export function effectiveSignal(yamb, options) {
-  const signals = [];
+  const signal = options?.signal;
 
-  if (yamb?.signal) {
-    signals.push(yamb.signal);
+  return yamb?.signal && signal ? AbortSignal.any([yamb.signal, signal]) : (yamb?.signal ?? signal);
+}
+
+export function begin(yamb, options) {
+  if (!yamb.isOpen) {
+    throw new YambNotOpenError('yamb instance is not open');
   }
 
-  if (options?.signal) {
-    signals.push(options.signal);
-  }
+  const signal = effectiveSignal(yamb, options);
 
-  if (signals.length === 0) {
-    return undefined;
-  }
+  signal?.throwIfAborted();
 
-  if (signals.length === 1) {
-    return signals[0];
-  }
-
-  return AbortSignal.any(signals);
+  return signal;
 }

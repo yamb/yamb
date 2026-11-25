@@ -107,8 +107,12 @@ export function captureRevision(state) {
 }
 
 export function sameValue(left, right) {
-  if (left instanceof Temporal.Instant || right instanceof Temporal.Instant) {
-    return left?.epochNanoseconds === right?.epochNanoseconds;
+  if (left instanceof Temporal.Instant) {
+    return right instanceof Temporal.Instant && left.equals(right);
+  }
+
+  if (right instanceof Temporal.Instant) {
+    return false;
   }
 
   return isDeepStrictEqual(left, right);

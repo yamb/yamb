@@ -126,11 +126,8 @@ test('OptionsSchema accepts limit null', () => {
   assert.deepEqual(OptionsSchema.parse({ limit: null }), { limit: null });
 });
 
-test('InstantSchema accepts iso string and Date', () => {
-  const isoResult = InstantSchema.parse('2026-04-26T10:00:00Z');
-  assert.ok(isoResult instanceof Temporal.Instant);
-  const dateResult = InstantSchema.parse(new Date('2026-04-26T10:00:00Z'));
-  assert.ok(dateResult instanceof Temporal.Instant);
+test('InstantSchema decodes an ISO string', () => {
+  assert.ok(InstantSchema.parse('2026-04-26T10:00:00Z') instanceof Temporal.Instant);
 });
 
 test('ConfigSchema requires storage', () => {
@@ -170,14 +167,6 @@ test('LinksSchema defaults related to []', () => {
 
 test('LinksSchema rejects related items longer than 64 chars', () => {
   assert.throws(() => LinksSchema.parse({ related: ['a'.repeat(65)] }));
-});
-
-test('InstantSchema: invalid Date is a failed parse, not a thrown RangeError', () => {
-  let result;
-  assert.doesNotThrow(() => {
-    result = InstantSchema.safeParse(new Date('not a date'));
-  });
-  assert.equal(result.success, false);
 });
 
 test('InstantSchema rejects years outside the sortable 0001-9999 range', () => {

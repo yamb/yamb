@@ -32,7 +32,7 @@ function makePost(initialStatus = 'draft') {
     slugger: (t) => t.toLowerCase()
   };
 
-  setYambState(yamb, { byId: yamb.byId, byUri: yamb.byUri });
+  setYambState(yamb, { byId: yamb.byId, byUri: yamb.byUri, walks: new Set() });
 
   setState(post, {
     yamb,

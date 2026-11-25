@@ -48,7 +48,7 @@ function makePost({ data, pristine = null, storage }) {
         .replace(/^-|-$/g, '')
   };
 
-  setYambState(yamb, { byId, byUri });
+  setYambState(yamb, { byId, byUri, walks: new Set() });
 
   setState(post, {
     yamb,
@@ -446,29 +446,6 @@ test('rename: save updates byId to new uri; id stable', async () => {
   const state = gs(post);
   assert.equal(state.data.id, 'rename-id', 'id stable');
   assert.equal(state.yamb.byId.get('rename-id'), state.data.uri, 'byId points to new uri');
-});
-
-test('save with a clock returning a Date publishes without crashing, publishedAt is a Temporal.Instant', async () => {
-  const storage = makeStorage();
-
-  const post = makePost({
-    data: {
-      title: 'Hello',
-      text: '...',
-      status: 'published',
-      tags: [],
-      links: { related: [] }
-    },
-    storage
-  });
-
-  const { getState: gs } = await import('../../../src/post/internal.js');
-  gs(post).yamb.clock = () => new Date('2026-04-26T12:00:00.000Z');
-
-  await save.fn(post);
-  assert.equal(storage._calls.length, 1);
-  assert.equal(gs(post).data.publishedAt.toString(), '2026-04-26T12:00:00Z');
-  assert.equal(storage._calls[0].data.uri, '2026/04/hello');
 });
 
 test('remove deletes by id and clears byId entry', async () => {

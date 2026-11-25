@@ -2,27 +2,8 @@ import { getOptionsConfig } from '../../options.js';
 import { reportError } from '../../report-error.js';
 import { effectiveSignal } from '../../signal.js';
 import { getState } from '../internal.js';
-
-async function rollback(yamb, state, prepared) {
-  state.byId.clear();
-  state.byUri.clear();
-
-  for (const renderer of prepared) {
-    if (typeof renderer.dispose === 'function') {
-      try {
-        await renderer.dispose({ yamb, timeZone: state.timeZone });
-      } catch (err) {
-        reportError(state.onError, err, { op: 'open.rollback.renderer', name: renderer.name });
-      }
-    }
-  }
-
-  try {
-    await state.storage.close({});
-  } catch (err) {
-    reportError(state.onError, err, { op: 'open.rollback.storage' });
-  }
-}
+import { load } from '../lookups.js';
+import { dispose } from './close.js';
 
 async function openOnce(yamb, state, signal) {
   const prepared = [];
@@ -37,11 +18,7 @@ async function openOnce(yamb, state, signal) {
 
     signal?.throwIfAborted();
 
-    for await (const [id, uri] of state.storage.entries({ signal })) {
-      signal?.throwIfAborted();
-      state.byId.set(id, uri);
-      state.byUri.set(uri, id);
-    }
+    const { byId, byUri } = await load(state.storage, signal);
 
     for (const renderer of Object.values(state.renderers)) {
       if (typeof renderer.prepare === 'function') {
@@ -58,8 +35,16 @@ async function openOnce(yamb, state, signal) {
     }
 
     signal?.throwIfAborted();
+    state.byId = byId;
+    state.byUri = byUri;
   } catch (err) {
-    await rollback(yamb, state, prepared);
+    await dispose(yamb, state, prepared, 'open.rollback.renderer');
+
+    try {
+      await state.storage.close({});
+    } catch (closeError) {
+      reportError(state.onError, closeError, { op: 'open.rollback.storage' });
+    }
 
     throw err;
   }
@@ -75,9 +60,7 @@ export default {
   async fn(yamb, options = {}) {
     const state = getState(yamb);
 
-    if (state.closing) {
-      await state.closing;
-    }
+    await state.closing?.catch(() => {});
 
     if (state.isOpen) {
       return yamb;
@@ -91,12 +74,10 @@ export default {
 
     signal?.throwIfAborted();
 
-    const opening = openOnce(yamb, state, signal);
-
-    state.opening = opening;
+    state.opening = openOnce(yamb, state, signal);
 
     try {
-      return await opening;
+      return await state.opening;
     } finally {
       state.opening = null;
     }

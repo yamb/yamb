@@ -2,10 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { PostCollection } from '../../src/post-collection/index.js';
-import { getState } from '../../src/post-collection/internal.js';
 
 function makeYamb(rawPosts = []) {
+  const calls = [];
+
   return {
+    calls,
     isOpen: true,
     timeZone: 'UTC',
     base: 'https://example.com',
@@ -14,12 +16,10 @@ function makeYamb(rawPosts = []) {
         return rawPosts.filter((p) => !query.status || p.status === query.status).length;
       },
       all(query, options) {
+        calls.push({ query, options });
+
         const filtered = rawPosts.filter((p) => {
           if (query.status && p.status !== query.status) {
-            return false;
-          }
-
-          if (query.tag && !p.tags?.includes(query.tag)) {
             return false;
           }
 
@@ -93,35 +93,25 @@ test('recent()/oldest() validate the limit like limit() (reject NaN/negative)', 
   assert.throws(() => c.oldest(-3));
 });
 
-test('recent()/oldest() accept a valid non-negative integer', () => {
+test('recent()/oldest() pass a valid non-negative limit to storage', async () => {
   const yamb = makeYamb();
   const c = new PostCollection(yamb, {}, {});
 
-  assert.equal(getState(c.recent(5)).options.limit, 5);
-  assert.equal(getState(c.oldest(0)).options.limit, 0);
+  await c.recent(5).toArray();
+  await c.oldest(1).toArray();
+
+  assert.equal(yamb.calls[0].options.limit, 5);
+  assert.equal(yamb.calls[1].options.limit, 1);
 });
 
-test('tagged(): single tag keeps singular `tag` (membership form)', () => {
+test('tagged() accumulates a deduplicated AND-set of tags', async () => {
   const yamb = makeYamb();
-  const c = new PostCollection(yamb, {}, {}).tagged('js');
-  const { query } = getState(c);
-  assert.equal(query.tag, 'js');
-  assert.equal(query.tags, undefined);
-});
 
-test('tagged(): chaining accumulates into `tags` AND-set', () => {
-  const yamb = makeYamb();
-  const c = new PostCollection(yamb, {}, {}).tagged('a').tagged('b');
-  const { query } = getState(c);
-  assert.deepEqual(query.tags, ['a', 'b']);
-  assert.equal(query.tag, undefined);
-});
+  await new PostCollection(yamb, {}, {}).tagged('a').toArray();
+  await new PostCollection(yamb, {}, {}).tagged('a', 'b').tagged('a').toArray();
 
-test('tagged(): chaining dedups repeated tags', () => {
-  const yamb = makeYamb();
-  const c = new PostCollection(yamb, {}, {}).tagged('a').tagged('a');
-  const { query } = getState(c);
-  assert.deepEqual(query.tags, ['a']);
+  assert.deepEqual(yamb.calls[0].query, { tags: ['a'] });
+  assert.deepEqual(yamb.calls[1].query, { tags: ['a', 'b'] });
 });
 
 test('tagged(): chained tags AND end-to-end (only posts with all tags)', async () => {
@@ -160,6 +150,7 @@ test('tagged(): chained tags AND end-to-end (only posts with all tags)', async (
 test('PostCollection with limit:0 yields nothing without touching storage', async () => {
   let called = false;
   const yamb = {
+    isOpen: true,
     storage: {
       all() {
         called = true;

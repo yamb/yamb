@@ -28,6 +28,33 @@ test('bare AsyncIterator source: early break calls source.return()', async () =>
   assert.equal(returned, true, 'source.return() must fire on early termination');
 });
 
+for (const field of ['value', 'done']) {
+  test(`a source whose result ${field} getter throws is closed and the error kept`, async () => {
+    const failure = new Error(`${field} getter failed`);
+    let returned = 0;
+    const source = {
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+      async next() {
+        return Object.defineProperty({ value: 1, done: false }, field, {
+          get() {
+            throw failure;
+          }
+        });
+      },
+      async return() {
+        returned++;
+
+        return { value: undefined, done: true };
+      }
+    };
+
+    await assert.rejects(AsyncIteratorHelper.from(source).toArray(), (error) => error === failure);
+    assert.equal(returned, 1);
+  });
+}
+
 test('asyncDispose closes a source whose iteration already started', async () => {
   let returned = false;
   async function* gen() {

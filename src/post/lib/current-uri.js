@@ -9,13 +9,14 @@ export function currentUri(state) {
 
   const cached = state.cache.uri;
 
-  if (cached?.slug === slug && cached.status === status && cached.publishedAt === publishedAt) {
-    return cached.value;
+  if (cached?.slug !== slug || cached.status !== status || cached.publishedAt !== publishedAt) {
+    state.cache.uri = {
+      slug,
+      status,
+      publishedAt,
+      value: buildUri(state.data, state.yamb.timeZone)
+    };
   }
 
-  const value = buildUri(state.data, state.yamb.timeZone);
-
-  state.cache.uri = { slug, status, publishedAt, value };
-
-  return value;
+  return state.cache.uri.value;
 }

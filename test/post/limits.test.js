@@ -39,8 +39,9 @@ for (const [field, limit] of [
     assert.deepEqual(post[field], valid);
     assert.equal(post.hash(), key);
     assert.deepEqual(post.changes(), {});
-    const invalid = blog.build({ ...source, [field]: overflow });
-    await assert.rejects(() => invalid.save(), { code: 'YAMB_POST_VALIDATION' });
+    assert.throws(() => blog.build({ ...source, [field]: overflow }), {
+      code: 'YAMB_POST_VALIDATION'
+    });
     await assert.rejects(() => blog.create({ ...source, [field]: overflow }), {
       code: 'YAMB_POST_VALIDATION'
     });

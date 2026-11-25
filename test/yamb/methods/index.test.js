@@ -1,47 +1,33 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { setState } from '../../../src/yamb/internal.js';
-import has from '../../../src/yamb/methods/has.js';
-import identify from '../../../src/yamb/methods/identify.js';
-import locate from '../../../src/yamb/methods/locate.js';
+import { blogWith, postData } from '../../perf/fixture.js';
 
-function makeYamb() {
-  const yamb = {};
-  const byId = new Map([['id-1', '2026/04/a']]);
-  const byUri = new Map([['2026/04/a', 'id-1']]);
+async function blogWithPost(t) {
+  const blog = await blogWith([{ ...postData(), id: 'id-1', uri: '2026/04/a', slug: 'a' }]);
 
-  setState(yamb, { byId, byUri });
+  t.after(() => blog.close());
 
-  return yamb;
+  return blog;
 }
 
-test('locate(id) returns the uri for a known id', () => {
-  const yamb = makeYamb();
-  assert.equal(locate.fn(yamb, 'id-1'), '2026/04/a');
+test('locate(id) returns the uri for a known id and undefined otherwise', async (t) => {
+  const blog = await blogWithPost(t);
+
+  assert.equal(blog.locate('id-1'), '2026/04/a');
+  assert.equal(blog.locate('nope'), undefined);
 });
 
-test('locate(id) returns undefined for an unknown id', () => {
-  const yamb = makeYamb();
-  assert.equal(locate.fn(yamb, 'nope'), undefined);
+test('identify(uri) returns the id for a known uri and undefined otherwise', async (t) => {
+  const blog = await blogWithPost(t);
+
+  assert.equal(blog.identify('2026/04/a'), 'id-1');
+  assert.equal(blog.identify('2026/04/missing'), undefined);
 });
 
-test('identify(uri) returns the id for a known uri', () => {
-  const yamb = makeYamb();
-  assert.equal(identify.fn(yamb, '2026/04/a'), 'id-1');
-});
+test('has(uri) reports whether a uri is known', async (t) => {
+  const blog = await blogWithPost(t);
 
-test('identify(uri) returns undefined for an unknown uri', () => {
-  const yamb = makeYamb();
-  assert.equal(identify.fn(yamb, '2026/04/missing'), undefined);
-});
-
-test('has(uri) returns true for a known uri', () => {
-  const yamb = makeYamb();
-  assert.equal(has.fn(yamb, '2026/04/a'), true);
-});
-
-test('has(uri) returns false for an unknown uri', () => {
-  const yamb = makeYamb();
-  assert.equal(has.fn(yamb, '2026/04/missing'), false);
+  assert.equal(blog.has('2026/04/a'), true);
+  assert.equal(blog.has('2026/04/missing'), false);
 });

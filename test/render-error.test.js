@@ -2,22 +2,45 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { RendererInputError } from '../src/errors/index.js';
-import { normalizeRenderError } from '../src/render-error.js';
+import { blogWith } from './perf/fixture.js';
 
-test('normalizeRenderError wraps a plain error as YAMB_RENDERER_FAILED', () => {
-  const out = normalizeRenderError(new Error('boom'), 'html');
-  assert.equal(out.code, 'YAMB_RENDERER_FAILED');
-  assert.match(out.message, /renderer "html" failed/);
-  assert.equal(out.cause.message, 'boom');
+async function renderThrowing(t, failure) {
+  const renderer = {
+    name: 'html',
+    version: '1',
+    collection() {
+      throw failure;
+    }
+  };
+  const blog = await blogWith([], { renderers: { html: renderer } });
+
+  t.after(() => blog.close());
+
+  return blog.render('html', { posts: [] }).then(
+    () => assert.fail('render must reject'),
+    (error) => error
+  );
+}
+
+test('render wraps a plain renderer error as YAMB_RENDERER_FAILED', async (t) => {
+  const failure = new Error('boom');
+  const error = await renderThrowing(t, failure);
+
+  assert.equal(error.code, 'YAMB_RENDERER_FAILED');
+  assert.match(error.message, /renderer "html" failed/);
+  assert.equal(error.cause, failure);
 });
 
-test('normalizeRenderError passes a typed Yamb error through unchanged', () => {
-  const input = new RendererInputError('bad');
-  assert.equal(normalizeRenderError(input, 'rss'), input);
+test('render passes a typed Yamb error through unchanged', async (t) => {
+  const failure = new RendererInputError('bad');
+
+  assert.equal(await renderThrowing(t, failure), failure);
 });
 
-test('normalizeRenderError passes an AbortError through unchanged', () => {
-  const abort = new Error('aborted');
-  abort.name = 'AbortError';
-  assert.equal(normalizeRenderError(abort, 'json'), abort);
+test('render passes an AbortError through unchanged', async (t) => {
+  const failure = new Error('aborted');
+
+  failure.name = 'AbortError';
+
+  assert.equal(await renderThrowing(t, failure), failure);
 });

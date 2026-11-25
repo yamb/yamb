@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { createHash, hash } from 'node:crypto';
+import { mkdtempDisposable, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -46,18 +46,18 @@ async function published(name, version, token, integrity, length) {
   const artifact = await get(url);
   assert.ok(artifact.ok && artifact.body, `GitHub Packages download failed (${artifact.status})`);
 
-  const hash = createHash('sha512');
+  const digest = createHash('sha512');
   let size = 0;
 
   for await (const chunk of artifact.body) {
     size += chunk.length;
     assert.ok(size <= length, 'Published tarball has different bytes');
-    hash.update(chunk);
+    digest.update(chunk);
   }
 
   assert.equal(size, length, 'Published tarball has different bytes');
   assert.equal(
-    `sha512-${hash.digest('base64')}`,
+    `sha512-${digest.digest('base64')}`,
     integrity,
     'Published tarball has different bytes'
   );
@@ -69,12 +69,8 @@ async function publish(input, digest, mode) {
 
   const archive = resolve(input);
   const bytes = await readFile(archive);
-  assert.equal(
-    `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
-    digest,
-    'Archive digest differs'
-  );
-  const integrity = `sha512-${createHash('sha512').update(bytes).digest('base64')}`;
+  assert.equal(`sha256:${hash('sha256', bytes)}`, digest, 'Archive digest differs');
+  const integrity = `sha512-${hash('sha512', bytes, 'base64')}`;
 
   const { version } = JSON.parse(await readFile('package.json', 'utf8'));
   const name = '@yamb/core';
@@ -95,7 +91,6 @@ async function publish(input, digest, mode) {
     }
   }
 
-  const directory = await mkdtemp(join(tmpdir(), 'yamb-publish-'));
   const args = [
     'publish',
     archive,
@@ -111,10 +106,10 @@ async function publish(input, digest, mode) {
 
   let result;
 
-  try {
-    result = spawnSync('pnpm', args, { cwd: directory, stdio: 'inherit', timeout: 90_000 });
-  } finally {
-    await rm(directory, { recursive: true, force: true });
+  {
+    await using directory = await mkdtempDisposable(join(tmpdir(), 'yamb-publish-'));
+
+    result = spawnSync('pnpm', args, { cwd: directory.path, stdio: 'inherit', timeout: 90_000 });
   }
 
   if (mode) {

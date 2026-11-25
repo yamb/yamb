@@ -10,9 +10,9 @@ Use this reference to configure a blog, edit and query posts, or implement stora
 | `renderers` | Map of format names to [renderers](#renderers) | `{}` |
 | `options` | Synchronous Zod object schema for application data | Empty strict object |
 | `base` | Absolute HTTP(S) blog URL without credentials, resolved as a directory; any host, including `localhost` and IP addresses | `http://localhost` |
-| `timeZone` | IANA time zone for dated URIs | `UTC` |
+| `timeZone` | IANA time zone for dated URIs, stored in canonical case | `UTC` |
 | `signal` | Global `AbortSignal` | Absent |
-| `clock` | Function returning an instant, ISO string or `Date` | `Temporal.Now.instant()` |
+| `clock` | Function returning a `Temporal.Instant` | `Temporal.Now.instant()` |
 | `slugger` | Synchronous `title => slug` | Cyrillic transliteration, accent removal, lowercase ASCII with dashes |
 | `onError` | Diagnostic callback `(error, context)`, sync or async | Absent |
 
@@ -23,12 +23,12 @@ Unknown configuration keys fail with `YAMB_CONFIG_INVALID`. `storage`, `renderer
 | `await blog.open({ signal }?)` | Open storage, load ID/URI lookups, prepare renderers; return blog |
 | `await blog.close()` | Dispose renderers, close storage, clear lookups |
 | `await blog.sync({ signal }?)` | Refresh storage state and replace lookups after a complete successful walk |
-| `blog.build(data?)` | Unsaved Post; incomplete data is allowed until save |
+| `blog.build(data?)` | Unsaved Post; each supplied field is validated now, missing fields are filled on save |
 | `await blog.create(data, { signal }?)` | Build and insert a Post |
 | `await blog.find(id, { signal }?)` | Post or `null`, by stable ID |
-| `await blog.fetch(uriOrUrl, { signal }?)` | Post or `null`, by current URI. Accepts the same input as `blog.uri()`. |
+| `await blog.fetch(uriOrUrl, { signal }?)` | Post or `null`, by current URI. Accepts the same input as `blog.uri()`; a path that is not a post URI returns `null` without a storage read. |
 | `await blog.fence(id, expected, { signal }?)` | Replace only the stored [version](#versions) when it equals `expected`; return the new version |
-| `blog.uri(uriOrUrl)` | Trim whitespace and leading slashes from URI strings. Accept an absolute URL string or native `URL` and extract its same-origin path relative to base. |
+| `blog.uri(uriOrUrl)` | Trim whitespace and leading slashes from URI strings. Accept an absolute URL string or native `URL` under the base origin and path, and return its path relative to base. |
 | `blog.locate(id)` | Indexed URI or `undefined` |
 | `blog.identify(uri)` | Indexed ID or `undefined` |
 | `blog.has(uri)` | Whether the canonical URI is indexed |
@@ -38,7 +38,7 @@ Unknown configuration keys fail with `YAMB_CONFIG_INVALID`. `storage`, `renderer
 
 `open` and `close` are idempotent; concurrent calls share their operation. Close waits for an earlier open; open during close waits for cleanup. A failed open rolls back acquired storage and every started renderer preparation. `Symbol.asyncDispose` calls close. Cleanup receives no operational signal.
 
-`await blog.fetch(post.url())` looks up a post by its current URL. URL lookup uses the path and ignores the query and fragment. A URL from another origin fails with `YAMB_URI_ORIGIN_MISMATCH`.
+`await blog.fetch(post.url())` looks up a post by its current URL. URL lookup uses the path and ignores the query and fragment. A URL from another origin or outside the base path fails with `YAMB_URI_ORIGIN_MISMATCH`.
 
 Operation signals combine with the global signal through `AbortSignal.any`; native cancellation reasons retain their identity. Storage operations require an open blog. `build`, collection construction and rendering do not acquire storage implicitly.
 
@@ -50,7 +50,7 @@ Public fields are own enumerable properties. `Object.keys`, `Object.entries` and
 | --- | --- |
 | `id` | Stable string, 1–64 Unicode code points; `null` when absent |
 | `uri` | Derived `drafts/<slug>` for drafts/dateless posts, otherwise `YYYY/MM/<slug>` in blog time zone |
-| `slug` | Lowercase ASCII letters, digits and dashes, 1–200 characters; derived from title on save when absent |
+| `slug` | Lowercase ASCII letters, digits and dashes, 1–200 characters; derived from title on save when absent and cut to 200 characters |
 | `title` | Trimmed nonempty string, ≤500 UTF-16 code units; required on save |
 | `text` | Full source text, ≤1048576 UTF-16 code units; defaults to `''` on save |
 | `preview` | Optional independent source text, ≤5000 UTF-16 code units; `''` is present |
@@ -61,10 +61,10 @@ Public fields are own enumerable properties. `Object.keys`, `Object.entries` and
 | `author` | Optional strict `{ name, email?, url? }`; name 1–200 Unicode code points, email validated |
 | `meta` | Optional strict `{ title?, description?, keywords? }`; limits 500/2000 Unicode code points, ≤20 keywords of 1–64 code points |
 | `social` | Optional strict `{ title?, description?, image? }`; title/description limits 500/2000 Unicode code points |
-| `createdAt`, `updatedAt`, `publishedAt` | `Temporal.Instant`; assignment accepts an instant, ISO string or `Date` in years 0001–9999 |
+| `createdAt`, `updatedAt`, `publishedAt` | `Temporal.Instant`; assignment accepts an instant or ISO string in years 0001–9999 |
 | `options` | Application [options](#options), default `{}` |
 
-Author URLs and social images accept `''`, absolute HTTP(S) URLs without credentials, or valid references starting with `/` or `./`. `text` includes any introduction; `preview` is never generated from text or metadata. Content interpretation belongs to explicit [preparation](#transformations).
+Author URLs and social images accept `''`, absolute HTTP(S) URLs without credentials, or valid references starting with `/` or `./` without credentials, backslashes or control characters. `text` includes any introduction; `preview` is never generated from text or metadata. Content interpretation belongs to explicit [preparation](#transformations).
 
 Whole-field assignments own their input. Nested objects/arrays remain live and validate synchronously; invalid edits roll back atomically. Array mutators validate one complete candidate. Borrowed array mutators and `Object.assign` perform sequential writes, so an earlier successful write remains if a later one fails. Optional fields clear with `undefined`; initialize an absent object before editing its children. Detached references cannot mutate a replacement.
 
@@ -188,12 +188,12 @@ A successful fence makes every pending write that expects `previous` inapplicabl
 
 `all()` and `for await (const post of blog)` include every status, with descending `publishedAt`/`uri` order and no implicit limit. Each PostCollection traversal creates an independent iterator. Declarative query predicates combine with AND and execute in storage.
 
-| Query key         | Predicate                                                  |
-| ----------------- | ---------------------------------------------------------- |
-| `status`, `uri`   | Exact value                                                |
-| `tag`, `tags`     | Membership / all listed tags                               |
-| `before`, `after` | Strict `publishedAt` bounds; instant, ISO string or `Date` |
-| `options`         | Exact scalar comparisons by declared field                 |
+| Query key         | Predicate                                          |
+| ----------------- | -------------------------------------------------- |
+| `status`, `uri`   | Exact value                                        |
+| `tags`            | All listed tags                                    |
+| `before`, `after` | Strict `publishedAt` bounds; instant or ISO string |
+| `options`         | Exact scalar comparisons by declared field         |
 
 Option filters accept string, finite number, boolean or `null`; missing stored values match captured defaults. Only supplied field schemas apply, including wrapper refinements; required siblings and whole-object refinements do not apply. Names match `[A-Za-z_][A-Za-z0-9_]*`, excluding `__proto__`, `prototype` and `constructor`. Unknown fields, arrays, objects and operators fail with `YAMB_QUERY_VALIDATION`.
 
@@ -280,7 +280,7 @@ const text = await transform('hello', [upper]);
 
 `prepare` captures a deeply frozen source copy before its first await and deeply freezes the result, including descendants of shallow-frozen objects. Pass `post.toJSON()`. The source must be a plain record. Source and result graphs contain only finite JSON values, plain records and dense arrays. Proxies, accessors, cycles, hidden properties and live class instances fail with `TypeError` without invoking getters. `transform` accepts arbitrary JavaScript values.
 
-Cancellation is checked before stages and after awaits. Stage failure becomes `TransformError` with `code: 'YAMB_TRANSFORM_FAILED'`, `stage` and `cause`; later stages do not run. `AbortError` and matching native signal reasons retain identity. Trusted synchronous application code remains cooperative; the executor does not preempt it.
+Cancellation is checked before stages and after awaits. Stage failure becomes `TransformError` with `code: 'YAMB_TRANSFORM_FAILED'`, `details.stage` and `cause`; later stages do not run. `AbortError` and matching native signal reasons retain identity. Trusted synchronous application code remains cooperative; the executor does not preempt it.
 
 Standard content preparation uses a full-post pipeline:
 
@@ -324,4 +324,4 @@ For cached preparation, build the key from the same source snapshot passed to `p
 
 `url` returns a native URL using base's pathname as a directory prefix, even without a trailing slash. Absolute/root-relative inputs retain native semantics; params set string query values. Input/base URL objects remain unchanged.
 
-Domain errors carry `code`, optional `cause` and `details`. Error classes derive from `YambError` and are named after their subject: `YambConfigError`, `YambNotOpenError`, `PostValidationError`, `PostDateError`, `PostStatusError`, `PostNotFoundError`, `PostConflictError`, `UriOriginError`, `UriTakenError`, `QueryValidationError`, `LinkRefNotFoundError`, `StorageNotOpenError`, `StorageReadError`, `StorageWriteError`, `StorageDuplicateError`, `RendererMissingError`, `RendererScopeError`, `RendererInputError`, `RendererFailedError`. Codes use `YAMB_` prefixes; date/status/config/origin/conflict codes are `YAMB_POST_DATE_INVALID`, `YAMB_POST_STATUS_INVALID`, `YAMB_CONFIG_INVALID`, `YAMB_URI_ORIGIN_MISMATCH`, `YAMB_POST_CONFLICT`. Native cancellation reasons need not be Error objects.
+Domain errors carry `code`, optional `cause` and `details`. Error classes derive from `YambError` and are named after their subject: `YambConfigError`, `YambNotOpenError`, `PostValidationError`, `PostDateError`, `PostStatusError`, `PostNotFoundError`, `PostConflictError`, `UriOriginError`, `UriTakenError`, `QueryValidationError`, `LinkRefNotFoundError`, `StorageNotOpenError`, `StorageReadError`, `StorageWriteError`, `StorageDuplicateError`, `RendererMissingError`, `RendererScopeError`, `RendererInputError`, `RendererFailedError`, `TransformError`. Codes use `YAMB_` prefixes; date/status/config/origin/conflict codes are `YAMB_POST_DATE_INVALID`, `YAMB_POST_STATUS_INVALID`, `YAMB_CONFIG_INVALID`, `YAMB_URI_ORIGIN_MISMATCH`, `YAMB_POST_CONFLICT`. Native cancellation reasons need not be Error objects.
